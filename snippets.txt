@@ -1,0 +1,44 @@
+    //int receivedMessageSize;
+  // while ((receivedMessageSize = socket->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
+  //   string message = echoBuffer;
+  //   cout << "Received Message: " << message << endl;
+
+  //   // Echo message back to client
+  //   socket->send(echoBuffer, receivedMessageSize);
+  // }
+  // Destructor closes socket
+
+// cout << "Handling client ";
+  // try {
+  //   cout << socket->getForeignAddress() << ":";
+  // } catch (SocketException &e) {
+  //   cerr << "Unable to get foreign address" << endl;
+  // }
+
+  // try {
+  //   cout << socket->getForeignPort();
+  // } catch (SocketException &e) {
+  //   cerr << "Unable to get foreign port" << endl;
+  // }
+  // cout << " with thread " << pthread_self() << endl;
+
+
+
+
+
+
+
+  // Get message from user
+      // cout << "Enter a message: ";
+      // scanf("%[^\n]%*c", echoString);
+      // echoStringLength = strlen(echoString);
+
+      // Send the string to the echo server
+      // socket.send(echoString, echoStringLength);
+
+    //char echoString[RCVBUFSIZE] = ""; // Second arg: string to echo
+  //int echoStringLength; // Input length
+
+
+       //while (totalBytesReceived < echoStringLength) {
+           //}

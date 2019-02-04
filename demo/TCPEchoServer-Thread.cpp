@@ -1,26 +1,15 @@
 /*
- *   C++ sockets on Unix and Windows
- *   Copyright (C) 2002
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Flare Director
+ * ASM
+ * TCPEchoServer-Thread.cpp
+ * 
  */
 
 #include "../lib/NetworkSocket.h"  // For Socket, ServerSocket, and SocketException
 #include <iostream>           // For cout, cerr
 #include <cstdlib>            // For atoi()  
 #include <pthread.h>          // For POSIX threads  
+#include <unistd.h>           // For usleep()
 
 const int RCVBUFSIZE = 32;    // 32 byte message buffer size
 
@@ -60,31 +49,21 @@ int main(int argc, char *argv[]) {
 
 // TCP client handling function
 void HandleTCPClient(TCPSocket *socket) {
-  cout << "Handling client ";
-  try {
-    cout << socket->getForeignAddress() << ":";
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign address" << endl;
-  }
-
-  try {
-    cout << socket->getForeignPort();
-  } catch (SocketException &e) {
-    cerr << "Unable to get foreign port" << endl;
-  }
-  cout << " with thread " << pthread_self() << endl;
-
   // Send received string and receive again until the end of transmission
   char echoBuffer[RCVBUFSIZE];
-  int receivedMessageSize;
-  while ((receivedMessageSize = socket->recv(echoBuffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
-    string message = echoBuffer;
-    cout << "Received Message: " << message << endl;
 
-    // Echo message back to client
-    socket->send(echoBuffer, receivedMessageSize);
+  int altitude = 120;
+  for (;;) {
+    sprintf(echoBuffer, "Altitude: %d", altitude);
+    socket->send(echoBuffer, strlen(echoBuffer));
+    string sentPacket = echoBuffer;
+    cout << "Sent: " << sentPacket << endl;
+    altitude--;
+    if (altitude == 0) {
+      altitude = 120;
+    }
+    usleep(100000); // 100 milliseconds (10 Hz)
   }
-  // Destructor closes socket
 }
 
 void *ThreadMain(void *clientSocket) {
