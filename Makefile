@@ -18,7 +18,7 @@
 #
 
 CXX = g++
-CXXFLAGS = -Wall -ansi -pedantic -g
+CXXFLAGS = -std=c++11 -Wall -ansi -pedantic -g -lpthread 
 
 ifeq ($(shell uname),SunOS)
   LIBS = -lsocket -lnsl

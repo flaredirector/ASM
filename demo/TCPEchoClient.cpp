@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
 
   try {
     // Establish connection with the echo server
-    TCPSocket socket(serverAddress, echoServerPort);
-  
+    TCPSocket *socket = new TCPSocket(serverAddress, echoServerPort);
+
     while (1) {
       // Prepare to receive message
       char echoBuffer[RCVBUFSIZE + 1];    // Buffer for echo string + \0
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
       // Receive the same string back from the server
       cout << "Received: ";               // Setup to print the echoed string
       // Receive up to the buffer size bytes from the sender
-      if ((bytesReceived = (socket.recv(echoBuffer, RCVBUFSIZE))) <= 0) {
+      if ((bytesReceived = (socket->recv(echoBuffer, RCVBUFSIZE))) <= 0) {
         cerr << "Unable to read packet" << endl;
         exit(1);
       }

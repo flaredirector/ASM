@@ -25,12 +25,13 @@ int main(int argc, char *argv[]) {
   unsigned short echoServerPort = atoi(argv[1]);    // First arg:  local port  
 
   try {
-    TCPServerSocket serverSocket(echoServerPort);   // Socket descriptor for server  
+    TCPServerSocket *serverSocket = new TCPServerSocket(echoServerPort);   // Socket descriptor for server  
   
     for (;;) {      // Run forever  
-      // Create separate memory for client argument  
-      TCPSocket *clientSocket = serverSocket.accept();
-  
+      // Create separate memory for client argument 
+      cout << "Waiting for Client Connection" << endl;
+      TCPSocket *clientSocket = serverSocket->accept(); // Blocks
+      cout << "Client Connected" << endl;
       // Create client thread  
       pthread_t threadID;              // Thread ID from pthread_create()  
       if (pthread_create(&threadID, NULL, ThreadMain, (void *) clientSocket) != 0) {
@@ -54,7 +55,7 @@ void HandleTCPClient(TCPSocket *socket) {
 
   int altitude = 120;
   for (;;) {
-    sprintf(echoBuffer, "Altitude: %d", altitude);
+    sprintf(echoBuffer, "altitude:%d\4", altitude);
     socket->send(echoBuffer, strlen(echoBuffer));
     string sentPacket = echoBuffer;
     cout << "Sent: " << sentPacket << endl;
