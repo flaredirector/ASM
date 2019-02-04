@@ -7,7 +7,7 @@
 
 #include "../lib/NetworkSocket.h"  // For Socket and SocketException
 #include <iostream>           // For cerr and cout
-#include <cstdlib>            // For atoi()
+#include <stdlib.h>
 
 using namespace std;
 
