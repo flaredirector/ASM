@@ -18,10 +18,10 @@
 #
 
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -ansi -pedantic -g -lpthread 
+CXXFLAGS = -I. -std=c++11 -Wall -ansi -pedantic -g
 
 ifeq ($(shell uname),SunOS)
-  LIBS = -lsocket -lnsl
+  LIBS = -lsocket -lnsl 
 endif
 
 all: TCPEchoClient TCPEchoServer-Thread
@@ -29,11 +29,11 @@ all: TCPEchoClient TCPEchoServer-Thread
 TCPEchoClient: demo/TCPEchoClient.cpp lib/NetworkSocket.cpp lib/NetworkSocket.h
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp lib/NetworkSocket.cpp $(LIBS)
 
-TCPEchoServer: demo/TCPEchoServer.cpp lib/NetworkSocket.cpp lib/NetworkSocket.h
+TCPEchoServer: demo/TCPEchoServer.cpp lib/NetworkSocket.cpp lib/NetworkSocket.h 
 	$(CXX) $(CXXFLAGS) -o TCPEchoServer TCPEchoServer.cpp lib/NetworkSocket.cpp $(LIBS)
 
-TCPEchoServer-Thread: demo/TCPEchoServer-Thread.cpp lib/NetworkSocket.cpp lib/NetworkSocket.h
-	$(CXX) -D_GNU_SOURCE -o bin/server demo/TCPEchoServer-Thread.cpp lib/NetworkSocket.cpp $(LIBS) -lpthread
+TCPEchoServer-Thread: demo/TCPEchoServer-Thread.cpp lib/NetworkSocket.cpp lib/NetworkSocket.h lib/lidar_lite.cpp
+	$(CXX) -D_GNU_SOURCE -o bin/server demo/TCPEchoServer-Thread.cpp lib/NetworkSocket.cpp lib/lidar_lite.cpp $(LIBS) -lpthread
 
 clean:
 	$(RM) -rf bin/TCPEchoClient.dSYM && $(RM) -f bin/*
