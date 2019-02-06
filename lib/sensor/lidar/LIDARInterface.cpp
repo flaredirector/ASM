@@ -1,4 +1,4 @@
-#include "../include/lidar_lite.h"
+#include "LIDARInterface.h"
 
 using namespace std;
 
