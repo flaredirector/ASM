@@ -2,20 +2,20 @@
 
 using namespace std;
 
-Lidar_Lite::Lidar_Lite (int bus){
+LIDARInterface::Lidar_Lite (int bus){
   err = 0;
   adapter_num = bus;
   snprintf(filename, 19, "/dev/i2c-%d", adapter_num);
 }
 
-Lidar_Lite::~Lidar_Lite(void){
+LIDARInterface::~Lidar_Lite(void){
   printf("Ending Lidar-Lite Session\n");
   if (i2c_bus > 0){
    int e = close(i2c_bus);
   }
 }
 
-int Lidar_Lite::connect( void ) {
+int LIDARInterface::connect( void ) {
   printf("Connecting to Lidar: %s\n", filename);
   i2c_bus = open(filename, O_RDWR);
   if (i2c_bus < 0){
@@ -32,7 +32,7 @@ int Lidar_Lite::connect( void ) {
 }
 
 
-int Lidar_Lite::writeAndWait(int writeRegister, int value){
+int LIDARInterface::writeAndWait(int writeRegister, int value){
   res = i2c_smbus_write_byte_data(i2c_bus, writeRegister, value);
   usleep(10000);
   if (res < 0){
@@ -44,7 +44,7 @@ int Lidar_Lite::writeAndWait(int writeRegister, int value){
   }
 }
 
-int Lidar_Lite::readAndWait(int readRegister){
+int LIDARInterface::readAndWait(int readRegister){
   res = i2c_smbus_read_byte_data(i2c_bus, readRegister);
   usleep(10000);
   if (res < 0){
@@ -56,7 +56,7 @@ int Lidar_Lite::readAndWait(int readRegister){
   }
 }
 
-int Lidar_Lite::getDistance( void ){
+int LIDARInterface::getDistance( void ){
   int buf[2];
   int e = 0;
   e = writeAndWait(0x00,0x04);
@@ -78,6 +78,6 @@ int Lidar_Lite::getDistance( void ){
   return (buf[0] << 8) + buf[1];
 }
 
-int Lidar_Lite::getError(void){
+int LIDARInterface::getError(void){
   return err;
 }
