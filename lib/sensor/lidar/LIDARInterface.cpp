@@ -9,23 +9,23 @@ Lidar_Lite::Lidar_Lite (int bus){
 }
 
 Lidar_Lite::~Lidar_Lite(void){
-  printf("Ending Lidar-Lite Session");
+  printf("Ending Lidar-Lite Session\n");
   if (i2c_bus > 0){
    int e = close(i2c_bus);
   }
 }
 
 int Lidar_Lite::connect( void ) {
-  printf("Connecting to %s", filename);
+  printf("Connecting to Lidar: %s\n", filename);
   i2c_bus = open(filename, O_RDWR);
   if (i2c_bus < 0){
     err = errno;
-    printf("Connect Error: %d", err);
+    printf("Connect Error: %d\n", err);
     return -1;
   }
   if (ioctl(i2c_bus, I2C_SLAVE, 0x62) < 0) {
     err = errno;
-    printf("Bus Error: %d", err);
+    printf("Bus Error: %d\n", err);
     return -1;
   }
   return 0;
@@ -37,7 +37,7 @@ int Lidar_Lite::writeAndWait(int writeRegister, int value){
   usleep(10000);
   if (res < 0){
     err = errno;
-    printf("Write Error %d", err);
+    printf("Write Error %d\n", err);
     return -1;
   } else {
     return 0;
@@ -49,7 +49,7 @@ int Lidar_Lite::readAndWait(int readRegister){
   usleep(10000);
   if (res < 0){
     err = errno;
-    printf("Read Error: %d", err);
+    printf("Read Error: %d\n", err);
     return -1;
   } else {
     return 0;
