@@ -82,23 +82,23 @@ void ASM::start(void) {
  * @param {task} The ThreadTask passed during thread creation
  */
 void ASM::handleConnection(ThreadTask *task) {
-  // Send received string and receive again until the end of transmission
-  char echoBuffer[RCVBUFSIZE];
-  while (task->lidar->err >= 0) {
-    // Get LIDAR distance
-    int distance = task->lidar->getDistance();
+    // Send received string and receive again until the end of transmission
+    char echoBuffer[RCVBUFSIZE];
+    while (task->lidar->err >= 0) {
+        // Get LIDAR distance
+        int distance = task->lidar->getDistance();
 
-    // Encode altitude into string for TCP packet transmission
-    sprintf(echoBuffer, "altitude:%d\4", distance);
-    task->clientSocket->send(echoBuffer, strlen(echoBuffer));
+        // Encode altitude into string for TCP packet transmission
+        sprintf(echoBuffer, "altitude:%d\4", distance);
+        task->clientSocket->send(echoBuffer, strlen(echoBuffer));
 
-    // Output debug data
-    string sentPacket = echoBuffer;
-    cout << "Sent: " << sentPacket << endl;
+        // Output debug data
+        string sentPacket = echoBuffer;
+        cout << "Sent: " << sentPacket << endl;
 
-    // 100 milliseconds (10 Hz)
-    usleep(100000); 
-  }
+        // 100 milliseconds (10 Hz)
+        usleep(100000); 
+    }
 }
 
 /**
@@ -109,15 +109,15 @@ void ASM::handleConnection(ThreadTask *task) {
  * @param {args} The context passed during thread creation
  */
 void *ASM::threadMain(void *args) {
-  // Guarantees that thread resources are deallocated upon return  
-  pthread_detach(pthread_self()); 
+    // Guarantees that thread resources are deallocated upon return  
+    pthread_detach(pthread_self()); 
 
-  // Extract socket file descriptor from argument  
-  this->handleConnection(((ThreadTask *) args));
+    // Extract socket file descriptor from argument  
+    this->handleConnection(((ThreadTask *) args));
 
-  // First cast is to tell delete what type of instance it's deleting
-  // Second cast is to tell compilter that there is a clientSocket attribute on args
-  delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+    // First cast is to tell delete what type of instance it's deleting
+    // Second cast is to tell compilter that there is a clientSocket attribute on args
+    delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
 }
 
 /**
