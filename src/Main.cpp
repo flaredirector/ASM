@@ -15,10 +15,10 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  unsigned short int serverPort = atoi(argv[1]);    // First arg:  local port  
+  unsigned short int serverPort = atoi(argv[1]); // Get port to listen to messages on
 
-  ASM *altitudeSensorModule = new ASM(serverPort); // Start the ASM Software
-  altitudeSensorModule->start();
+  ASM *altitudeSensorModule = new ASM(serverPort); // Initialize the ASM Software
+  altitudeSensorModule->start(); // Start the TCP Server
 
   return 0;
 }
