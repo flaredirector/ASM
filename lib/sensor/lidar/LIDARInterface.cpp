@@ -2,13 +2,13 @@
 
 using namespace std;
 
-LIDARInterface::Lidar_Lite (int bus){
+LIDARInterface::LIDARInterface (int bus){
   err = 0;
   adapter_num = bus;
   snprintf(filename, 19, "/dev/i2c-%d", adapter_num);
 }
 
-LIDARInterface::~Lidar_Lite(void){
+LIDARInterface::~LIDARInterface(void){
   printf("Ending Lidar-Lite Session\n");
   if (i2c_bus > 0){
    int e = close(i2c_bus);

@@ -23,8 +23,8 @@ class LIDARInterface{
     int res;
   public:
     int err;
-    Lidar_Lite(int);
-    ~Lidar_Lite(void);
+    LIDARInterface(int);
+    ~LIDARInterface(void);
     int connect(void);
     int writeAndWait(int, int);
     int readAndWait(int);

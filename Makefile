@@ -21,8 +21,8 @@ all: Main
 TCPEchoClient: demo/TCPEchoClient.cpp $(NETWORK)/NetworkSocket.cpp $(NETWORK)/NetworkSocket.h
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp lib/NetworkSocket.cpp $(LIBS)
 
-Main: src/Main.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp
-	$(CXX) -D_GNU_SOURCE -o bin/server src/Main.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp $(LIBS) -lpthread
+Main: src/Main.cpp src/ASM.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp
+	$(CXX) -D_GNU_SOURCE -o bin/server src/Main.cpp src/ASM.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp $(LIBS) -lpthread
 
 clean:
 	$(RM) -rf bin/TCPEchoClient.dSYM && $(RM) -f bin/*

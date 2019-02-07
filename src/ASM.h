@@ -12,15 +12,23 @@
 #include "../lib/network/NetworkSocket.h"  // For Socket, ServerSocket, and SocketException
 #include "../lib/sensor/lidar/LIDARInterface.h"
 
-using namespace std;
+class ThreadTask {
+    public:
+    LIDARInterface *lidar;
+    TCPSocket *clientSocket;
+    ThreadTask(TCPSocket *cs, LIDARInterface *l);
+};
 
 class ASM {
     public:
-    ASM(const unsigned short port);
+    ASM(unsigned short int port);
     ~ASM();
-
+    void start(void);
+    
     private:
-    void handleConnection(TCPSocket *socket);
-    void *threadMain(void *clientSocket);
-    LIDARInterface lidar;
-}
+    LIDARInterface *lidar;
+    int port;
+    void handleConnection(ThreadTask*);
+    void *threadMain(void *);
+    static void *threadMainHelper(void *clientSocket);
+};
