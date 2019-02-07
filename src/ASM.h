@@ -14,9 +14,12 @@
 #include "../lib/network/NetworkSocket.h"  // For Sockets
 #include "../lib/sensor/lidar/LIDARInterface.h" // For Lidar interface
 
+// 32 byte message buffer size
+#define RCVBUFSIZE 32    
+
 /**
  * @class ThreadTask
- * 
+ * TODO: Move to own class file
  * The ThreadTask class contains the necessary properties
  * to pass to pthread_create so that the thread can access
  * important class instances such as the sensors and newly

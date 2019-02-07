@@ -11,15 +11,12 @@
 
 using namespace std;
 
-// 32 byte message buffer size
-#define RCVBUFSIZE 32    
-
 /**
  * ThreadTask
- * Instantiates new ThreadTask with arguments
+ ** Instantiates new ThreadTask with arguments
  * TODO: Move this to own class file.
- * @param cs The new client socket instance
- * @param l The instance of the LIDARInterface
+ * @param {cs} The new client socket instance
+ * @param {l} The instance of the LIDARInterface
  * 
  */
 ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
@@ -29,9 +26,8 @@ ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
 
 /**
  * ASM
- * Instantiates new ASM instance with port argument.
- * 
- * @param port The port to send/receive messages on
+ ** Instantiates new ASM instance with port argument.
+ * @param {port} The port to send/receive messages on
  */
 ASM::ASM(unsigned short int port) {
     // Set port to passed in port number
@@ -49,8 +45,8 @@ ASM::ASM(unsigned short int port) {
 
 /**
  * start
- * Starts the event loop which listens for new connections
- * and spwans a new thread for each connection.
+ ** Starts the event loop which listens for new connections
+ ** and spwans a new thread for each connection.
  */
 void ASM::start(void) {
     try {
@@ -82,8 +78,8 @@ void ASM::start(void) {
 
 /**
  * handleConnection
- * Executes when a new connection is received
- * @param task The ThreadTask passed during thread creation
+ ** Executes when a new connection is received
+ * @param {task} The ThreadTask passed during thread creation
  */
 void ASM::handleConnection(ThreadTask *task) {
   // Send received string and receive again until the end of transmission
@@ -107,10 +103,10 @@ void ASM::handleConnection(ThreadTask *task) {
 
 /**
  * threadMain
- * Method that executes when pthread_create is called which
- * controls critical section of handleConnection and deallocates 
- * socket memory after completion.
- * @param args The context passed during thread creation
+ ** Method that executes when pthread_create is called which
+ ** controls critical section of handleConnection and deallocates 
+ ** socket memory after completion.
+ * @param {args} The context passed during thread creation
  */
 void *ASM::threadMain(void *args) {
   // Guarantees that thread resources are deallocated upon return  
@@ -126,9 +122,9 @@ void *ASM::threadMain(void *args) {
 
 /**
  * threadMainHelper
- * Helper method that enables threadMain to get called in 
- * pthread_create.
- * @param args The ThreadTask passed during thread creation.
+ ** Helper method that enables threadMain to get called in 
+ ** pthread_create.
+ * @param {args} The ThreadTask passed during thread creation.
  */
 void *ASM::threadMainHelper(void *args) {
     return ((ASM *)args)->threadMain(args);
