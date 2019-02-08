@@ -7,10 +7,15 @@
 #
 
 CXX = g++
-CXXFLAGS = -I. -std=c++11 -Wall -ansi -pedantic -g
+CXXFLAGS = -Wall -ansi -pedantic -g -lpthread
 
-LIDAR = lib/sensor/lidar
-NETWORK = lib/network
+# Targets
+LIDAR = lib/sensor/lidar/*.cpp
+NETWORK = lib/network/*.cpp
+SRC = src/*.cpp
+
+# Output of built code
+BINARY = bin/asm
 
 ifeq ($(shell uname),SunOS)
   LIBS = -lsocket -lnsl 
@@ -21,8 +26,8 @@ all: Main
 TCPEchoClient: demo/TCPEchoClient.cpp $(NETWORK)/NetworkSocket.cpp $(NETWORK)/NetworkSocket.h
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp lib/NetworkSocket.cpp $(LIBS)
 
-Main: src/Main.cpp src/ASM.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp
-	$(CXX) -D_GNU_SOURCE -o bin/server src/Main.cpp src/ASM.cpp $(NETWORK)/NetworkSocket.cpp $(LIDAR)/LIDARInterface.cpp $(LIBS) -lpthread
+Main: $(SRC) $(NETWORK) $(LIDAR)
+	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread
 
 clean:
-	$(RM) -rf bin/TCPEchoClient.dSYM && $(RM) -f bin/*
+	$(RM) -rf bin/client.dSYM && $(RM) -f bin/*

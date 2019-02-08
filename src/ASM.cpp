@@ -12,19 +12,6 @@
 using namespace std;
 
 /**
- * ThreadTask
- ** Instantiates new ThreadTask with arguments
- * TODO: Move this to own class file.
- * @param {cs} The new client socket instance
- * @param {l} The instance of the LIDARInterface
- * 
- */
-ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
-    this->lidar = l;
-    this->clientSocket = cs;
-}
-
-/**
  * ASM
  ** Instantiates new ASM instance with port argument.
  * @param {port} The port to send/receive messages on
@@ -35,12 +22,6 @@ ASM::ASM(unsigned short int port) {
 
     // Initialize new LIDAR interface
     this->lidar = new LIDARInterface(1);
-    // Attempt connection to the LIDAR interface
-    int err = this->lidar->connect();
-    // Check for error in connecting to the LIDAR interface
-    if (err < 0){
-        printf("%d", this->lidar->err);
-    }
 }
 
 /**
@@ -52,6 +33,13 @@ void ASM::start(void) {
     try {
         // Socket descriptor for server
         TCPServerSocket *serverSocket = new TCPServerSocket(this->port);  
+
+        // Attempt connection to the LIDAR interface
+        int err = this->lidar->connect();
+        // Check for error in connecting to the LIDAR interface
+        if (err < 0){
+            printf("%d", this->lidar->err);
+        }
     
         // Run forever  
         for (;;) {      
@@ -118,6 +106,8 @@ void *ASM::threadMain(void *args) {
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
     delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+
+    //return NULL;
 }
 
 /**

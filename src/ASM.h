@@ -11,26 +11,10 @@
 #include <cstdlib>            // For atoi()  
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
-#include "../lib/network/NetworkSocket.h"  // For Sockets
-#include "../lib/sensor/lidar/LIDARInterface.h" // For Lidar interface
+#include "ThreadTask.h"
 
 // 32 byte message buffer size
 #define RCVBUFSIZE 32    
-
-/**
- * @class ThreadTask
- * TODO: Move to own class file
- * The ThreadTask class contains the necessary properties
- * to pass to pthread_create so that the thread can access
- * important class instances such as the sensors and newly
- * created TCP socket.
- */
-class ThreadTask {
-    public:
-    LIDARInterface *lidar;
-    TCPSocket *clientSocket;
-    ThreadTask(TCPSocket *cs, LIDARInterface *l);
-};
 
 /**
  * @class ASM
