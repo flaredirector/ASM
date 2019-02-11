@@ -21,3 +21,7 @@ ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
     this->lidar = l;
     this->clientSocket = cs;
 }
+
+ThreadTask::ThreadTask(TCPSocket *cs) {
+    this->clientSocket = cs;
+}

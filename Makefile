@@ -21,13 +21,16 @@ ifeq ($(shell uname),SunOS)
   LIBS = -lsocket -lnsl 
 endif
 
-all: Main
+all: main
 
 TCPEchoClient: demo/TCPEchoClient.cpp $(NETWORK)/NetworkSocket.cpp $(NETWORK)/NetworkSocket.h
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp lib/NetworkSocket.cpp $(LIBS)
 
-Main: $(SRC) $(NETWORK) $(LIDAR)
+main: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread
+
+debug: $(SRC) $(NETWORK) $(LIDAR)
+	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread -DDEBUG
 
 clean:
 	$(RM) -rf bin/client.dSYM && $(RM) -f bin/*

@@ -1,6 +1,7 @@
-#ifndef LIDAR_LITE_H
-#define LIDAR_LITE_H
-
+#ifndef DEBUG
+// #ifndef LIDAR_LITE_H
+// #define LIDAR_LITE_H
+//#endif
 
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
@@ -16,6 +17,7 @@
 #define LIDAR_LITE_DIST_READ_REG = 0x8f
 #define LIDAR_LITE_DIST_READ_REG_2 = 0x98
 
+#endif
 class LIDARInterface{
     int i2c_bus;
     int adapter_num;
@@ -31,8 +33,3 @@ class LIDARInterface{
     int getDistance(void);
     int getError(void);
 };
-
-
-
-
-#endif

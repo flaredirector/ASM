@@ -1,7 +1,7 @@
 #include "LIDARInterface.h"
 
+#ifndef DEBUG
 using namespace std;
-
 LIDARInterface::LIDARInterface (int bus){
   err = 0;
   adapter_num = bus;
@@ -81,3 +81,4 @@ int LIDARInterface::getDistance( void ){
 int LIDARInterface::getError(void){
   return err;
 }
+#endif

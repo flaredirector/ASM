@@ -20,8 +20,10 @@ ASM::ASM(unsigned short int port) {
     // Set port to passed in port number
     this->port = port;
 
+    #ifndef DEBUG
     // Initialize new LIDAR interface
     this->lidar = new LIDARInterface(1);
+    #endif
 }
 
 /**
@@ -34,13 +36,14 @@ void ASM::start(void) {
         // Socket descriptor for server
         TCPServerSocket *serverSocket = new TCPServerSocket(this->port);  
 
+        #ifndef DEBUG
         // Attempt connection to the LIDAR interface
         int err = this->lidar->connect();
         // Check for error in connecting to the LIDAR interface
         if (err < 0){
             printf("%d", this->lidar->err);
         }
-    
+        #endif
         // Run forever  
         for (;;) {      
             // Create separate memory for client argument 
@@ -48,8 +51,12 @@ void ASM::start(void) {
             // Blocks until new connection received.
             TCPSocket *clientSocket = serverSocket->accept(); 
 
+            #ifndef DEBUG
             // For each new connection, spawn a new thread
             ThreadTask *ttask = new ThreadTask(clientSocket, this->lidar);
+            #else
+            ThreadTask *ttask = new ThreadTask(clientSocket);
+            #endif
             cout << "Client Connected" << endl;
             pthread_t threadID;
             if (pthread_create(&threadID, NULL, &ASM::threadMainHelper, (void *) ttask) != 0) {
@@ -72,6 +79,7 @@ void ASM::start(void) {
 void ASM::handleConnection(ThreadTask *task) {
     // Send received string and receive again until the end of transmission
     char echoBuffer[RCVBUFSIZE];
+    #ifndef DEBUG
     while (task->lidar->err >= 0) {
         // Get LIDAR distance
         int distance = task->lidar->getDistance();
@@ -87,6 +95,24 @@ void ASM::handleConnection(ThreadTask *task) {
         // 100 milliseconds (10 Hz)
         usleep(100000); 
     }
+    #else
+    int distance = 120;
+    while (1) {
+        // Encode altitude into string for TCP packet transmission
+        sprintf(echoBuffer, "altitude:%d\4", distance);
+        task->clientSocket->send(echoBuffer, strlen(echoBuffer));
+
+        // Output debug data
+        string sentPacket = echoBuffer;
+        cout << "Sent: " << sentPacket << endl;
+
+        // 100 milliseconds (10 Hz)
+        usleep(100000); 
+        distance--;
+        if (distance < 0)
+            distance = 120;
+    }
+    #endif
 }
 
 /**
@@ -107,7 +133,7 @@ void *ASM::threadMain(void *args) {
     // Second cast is to tell compilter that there is a clientSocket attribute on args
     delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
 
-    //return NULL;
+    return NULL;
 }
 
 /**

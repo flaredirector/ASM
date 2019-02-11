@@ -22,4 +22,5 @@ class ThreadTask {
     LIDARInterface *lidar;
     TCPSocket *clientSocket;
     ThreadTask(TCPSocket *cs, LIDARInterface *l);
+    ThreadTask(TCPSocket *cs);
 };
