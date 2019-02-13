@@ -23,8 +23,8 @@ endif
 
 all: main
 
-TCPEchoClient: demo/TCPEchoClient.cpp $(NETWORK)/NetworkSocket.cpp $(NETWORK)/NetworkSocket.h
-	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp lib/NetworkSocket.cpp $(LIBS)
+client: demo/TCPEchoClient.cpp $(NETWORK)
+	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp $(NETWORK) $(LIBS)
 
 main: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread

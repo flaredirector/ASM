@@ -27,10 +27,15 @@ int main(int argc, char *argv[]) {
     // Get port to listen to messages on
     unsigned short int serverPort = atoi(argv[1]);
 
-    // Initialize the ASM Software
-    ASM *altitudeSensorModule = new ASM(serverPort);
-    // Start the TCP Server
-    altitudeSensorModule->start();
+    try {
+		// Initialize the ASM Software
+		ASM *altitudeSensorModule = new ASM(serverPort);
+		// Start the TCP Server
+		altitudeSensorModule->start();
 
+		cout << "at end of try" << endl;
+    } catch (...) {
+      	cout << "caught exception in main" << endl;
+    }
     return 0;
 }

@@ -12,6 +12,7 @@
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
 #include "ThreadTask.h"
+#include "Message.hpp"
 
 // 32 byte message buffer size
 #define RCVBUFSIZE 32    

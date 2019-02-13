@@ -32,42 +32,52 @@ ASM::ASM(unsigned short int port) {
  ** and spwans a new thread for each connection.
  */
 void ASM::start(void) {
+    TCPServerSocket *serverSocket;
     try {
         // Socket descriptor for server
-        TCPServerSocket *serverSocket = new TCPServerSocket(this->port);  
-
-        #ifndef DEBUG
-        // Attempt connection to the LIDAR interface
-        int err = this->lidar->connect();
-        // Check for error in connecting to the LIDAR interface
-        if (err < 0){
-            printf("%d", this->lidar->err);
-        }
-        #endif
-        // Run forever  
-        for (;;) {      
-            // Create separate memory for client argument 
-            cout << "Waiting for Client Connection..." << endl;
-            // Blocks until new connection received.
-            TCPSocket *clientSocket = serverSocket->accept(); 
-
-            #ifndef DEBUG
-            // For each new connection, spawn a new thread
-            ThreadTask *ttask = new ThreadTask(clientSocket, this->lidar);
-            #else
-            ThreadTask *ttask = new ThreadTask(clientSocket);
-            #endif
-            cout << "Client Connected" << endl;
-            pthread_t threadID;
-            if (pthread_create(&threadID, NULL, &ASM::threadMainHelper, (void *) ttask) != 0) {
-                cerr << "Unable to create thread" << endl;
-                exit(1);
-            }
-        }
+        serverSocket = new TCPServerSocket(this->port);  
     } catch (SocketException &e) {
         // Print exception description
         cerr << e.what() << endl;
-        exit(1);
+    }
+
+    #ifndef DEBUG
+    // Attempt connection to the LIDAR interface
+    int err = this->lidar->connect();
+    // Check for error in connecting to the LIDAR interface
+    if (err < 0){
+        printf("%d", this->lidar->err);
+    }
+    #endif
+
+    // Run forever  
+    for (;;) {      
+        // Create separate memory for client argument 
+        cout << "Waiting for Client Connection..." << endl;
+        TCPSocket *clientSocket;
+        try {
+            // Blocks until new connection received.
+            clientSocket = serverSocket->accept();
+        } catch (SocketException &e) {
+            cerr << e.what() << endl;
+        }
+
+        ThreadTask *ttask;
+
+        #ifndef DEBUG
+        // For each new connection, spawn a new thread
+        ttask = new ThreadTask(clientSocket, this->lidar);
+        #else
+        ttask = new ThreadTask(clientSocket);
+        #endif
+
+        cout << "Client Connected" << endl;
+
+        pthread_t threadID;
+        if (pthread_create(&threadID, NULL, &ASM::threadMainHelper, (void *) ttask) != 0) {
+            cerr << "Unable to create thread" << endl;
+            exit(1);
+        }
     }
 }
 
@@ -78,19 +88,18 @@ void ASM::start(void) {
  */
 void ASM::handleConnection(ThreadTask *task) {
     // Send received string and receive again until the end of transmission
-    char echoBuffer[RCVBUFSIZE];
     #ifndef DEBUG
     while (task->lidar->err >= 0) {
-        // Get LIDAR distance
-        int distance = task->lidar->getDistance();
+        // Encode LIDAR distance into message
+        Message message = Message("altitude", task->lidar->getDistance());
 
         // Encode altitude into string for TCP packet transmission
-        sprintf(echoBuffer, "altitude:%d\4", distance);
-        task->clientSocket->send(echoBuffer, strlen(echoBuffer));
+        task->clientSocket->send(message.encode(), message.length());
 
         // Output debug data
-        string sentPacket = echoBuffer;
-        cout << "Sent: " << sentPacket << endl;
+        // string sentPacket = message->message;
+        // cout << "Sent: " << sentPacket << endl;
+        printf("Sent: %s", message.message);
 
         // 100 milliseconds (10 Hz)
         usleep(100000); 
@@ -99,12 +108,21 @@ void ASM::handleConnection(ThreadTask *task) {
     int distance = 120;
     while (1) {
         // Encode altitude into string for TCP packet transmission
-        sprintf(echoBuffer, "altitude:%d\4", distance);
-        task->clientSocket->send(echoBuffer, strlen(echoBuffer));
+        Message message = Message("altitude", distance);
 
+        message.encode();
+
+        // Encode altitude into string for TCP packet transmission
+        try {
+            task->clientSocket->send(message.encode(), message.length());
+        } catch (...) {
+            cout << "caught exception" << endl;
+            //cerr << e.what() << endl;
+            pthread_exit(NULL);
+        }
+        
         // Output debug data
-        string sentPacket = echoBuffer;
-        cout << "Sent: " << sentPacket << endl;
+        //cout << "Sent: " << message.printableMessage << endl;
 
         // 100 milliseconds (10 Hz)
         usleep(100000); 
