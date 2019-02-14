@@ -20,20 +20,21 @@ using namespace std;
 int main(int argc, char *argv[]) {
     // Test for correct number of arguments 
     if (argc != 2) { 
-      cerr << "Usage: " << argv[0] << " <Server Port> " << endl;
-      exit(1);
+      	cerr << "Usage: " << argv[0] << " <Server Port> " << endl;
+      	exit(1);
     }
 
     // Get port to listen to messages on
     unsigned short int serverPort = atoi(argv[1]);
 
     try {
-		// Initialize the ASM Software
-		ASM *altitudeSensorModule = new ASM(serverPort);
-		// Start the TCP Server
-		altitudeSensorModule->start();
+      	// Initialize the ASM Software
+      	ASM *altitudeSensorModule = new ASM(serverPort);
+      	// Start the TCP Server
+      	altitudeSensorModule->start();
     } catch (...) {
-      	cout << "caught exception in main" << endl;
+      	cout << "Something went wrong. Exiting program..." << endl;
+        exit(1);
     }
     return 0;
 }
