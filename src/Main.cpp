@@ -32,8 +32,6 @@ int main(int argc, char *argv[]) {
 		ASM *altitudeSensorModule = new ASM(serverPort);
 		// Start the TCP Server
 		altitudeSensorModule->start();
-
-		cout << "at end of try" << endl;
     } catch (...) {
       	cout << "caught exception in main" << endl;
     }

@@ -122,7 +122,8 @@ void ASM::handleConnection(ThreadTask *task) {
         }
         
         // Output debug data
-        //cout << "Sent: " << message.printableMessage << endl;
+        // cout << "Sent: " << message.printableMessage << endl;
+        printf("Sent: %s\n", message.message);
 
         // 100 milliseconds (10 Hz)
         usleep(100000); 

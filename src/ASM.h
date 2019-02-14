@@ -35,5 +35,5 @@ class ASM {
         int port;
         void handleConnection(ThreadTask*);
         void *threadMain(void *);
-        static void *threadMainHelper(void *clientSocket);
+        static void *threadMainHelper(void *args);
 };
