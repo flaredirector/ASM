@@ -22,6 +22,7 @@ using namespace std;
 Message::Message(string event, int data) {
     this->event = event;
     this->data = data;
+    this->encode();
 }
 
 /**

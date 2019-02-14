@@ -18,7 +18,7 @@
  */
 
 #include "NetworkSocket.h"
-#include <iostream>
+
 #ifdef WIN32
   #include <winsock.h>         // For socket(), connect(), send(), and recv()
   typedef int socklen_t;
@@ -196,7 +196,6 @@ void CommunicatingSocket::connect(const string &foreignAddress,
 void CommunicatingSocket::send(const void *buffer, int bufferLen) 
     throw(SocketException) {
   if (::send(sockDesc, (raw_type *) buffer, bufferLen, 0) < 0) {
-    cout << "Throwing send packet exception" << endl;
     throw SocketException("Send failed (send())", true);
   }
 }

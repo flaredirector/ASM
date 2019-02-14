@@ -8,6 +8,7 @@
  */
 
 #include "ASM.h"
+#include <signal.h>
 
 using namespace std;
 
@@ -32,6 +33,8 @@ ASM::ASM(unsigned short int port) {
  ** and spwans a new thread for each connection.
  */
 void ASM::start(void) {
+    sigignore(SIGPIPE); // Do not remove
+
     TCPServerSocket *serverSocket;
     try {
         // Socket descriptor for server
@@ -75,7 +78,7 @@ void ASM::start(void) {
 
         pthread_t threadID;
         if (pthread_create(&threadID, NULL, &ASM::threadMainHelper, (void *) ttask) != 0) {
-            cerr << "Unable to create thread" << endl;
+            cerr << "Unable to create client thread" << endl;
             exit(1);
         }
     }
@@ -110,24 +113,23 @@ void ASM::handleConnection(ThreadTask *task) {
         // Encode altitude into string for TCP packet transmission
         Message message = Message("altitude", distance);
 
-        message.encode();
-
         // Encode altitude into string for TCP packet transmission
         try {
-            task->clientSocket->send(message.encode(), message.length());
-        } catch (...) {
-            cout << "caught exception" << endl;
-            //cerr << e.what() << endl;
+            task->clientSocket->send(message.message, message.length());
+        } catch (SocketException &e) {
+            cerr << e.what() << endl;
             pthread_exit(NULL);
         }
         
         // Output debug data
-        // cout << "Sent: " << message.printableMessage << endl;
-        printf("Sent: %s\n", message.message);
+        cout << "Sent: " << message.printableMessage << endl;
 
         // 100 milliseconds (10 Hz)
         usleep(100000); 
+
         distance--;
+
+        // Reset distance if it drops below 0
         if (distance < 0)
             distance = 120;
     }
