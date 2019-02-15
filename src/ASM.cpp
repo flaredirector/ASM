@@ -8,7 +8,12 @@
  */
 
 #include "ASM.h"
-#include <signal.h>
+#include "Message.hpp"
+#include <iostream>           // For cout, cerr
+#include <cstdlib>            // For atoi()  
+#include <pthread.h>          // For POSIX threads  
+#include <unistd.h>           // For usleep()
+#include <signal.h>           // For sigignore()
 
 using namespace std;
 

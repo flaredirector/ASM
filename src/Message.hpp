@@ -7,7 +7,6 @@
  * definitions for the Message class.
 */
 
-#include <iostream>
 #include <string>
 
 // 32 byte message buffer size

@@ -8,6 +8,7 @@
  */
 
 #include "ASM.h"
+#include <iostream>
 
 using namespace std;
 
@@ -29,12 +30,15 @@ int main(int argc, char *argv[]) {
 
     try {
       	// Initialize the ASM Software
-      	ASM *altitudeSensorModule = new ASM(serverPort);
+      	ASM *asmInstance = new ASM(serverPort);
+
       	// Start the TCP Server
-      	altitudeSensorModule->start();
+      	asmInstance->start();
+    // Catch generic exception
     } catch (...) {
       	cout << "Something went wrong. Exiting program..." << endl;
         exit(1);
     }
+
     return 0;
 }

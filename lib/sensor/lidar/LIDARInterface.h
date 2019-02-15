@@ -1,7 +1,7 @@
 #ifndef DEBUG
-// #ifndef LIDAR_LITE_H
-// #define LIDAR_LITE_H
-//#endif
+#ifndef LIDAR_LITE_H
+#define LIDAR_LITE_H
+#endif
 
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
