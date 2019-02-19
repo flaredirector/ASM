@@ -30,10 +30,10 @@ int main(int argc, char *argv[]) {
 
     try {
       	// Initialize the ASM Software
-      	ASM *asmInstance = new ASM(serverPort);
+      	ASM *sensorModule = new ASM(serverPort);
 
       	// Start the TCP Server
-      	asmInstance->start();
+      	sensorModule->start();
     // Catch generic exception
     } catch (...) {
       	cout << "Something went wrong. Exiting program..." << endl;
