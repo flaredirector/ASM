@@ -8,7 +8,6 @@
  */
 
 #include "ASM.h"
-#include "Message.hpp"
 #include <iostream>           // For cout, cerr
 #include <cstdlib>            // For atoi()  
 #include <pthread.h>          // For POSIX threads  
@@ -120,15 +119,17 @@ void ASM::handleConnection(ThreadTask *task) {
 
         // Encode altitude into string for TCP packet transmission
         try {
-            task->clientSocket->send(message.message, message.length());
+            task->clientSocket->send(message);
         // On send error, client is most likely disconnected, so exit thread and cleanup
         } catch (SocketException &e) {
             cerr << e.what() << endl;
             pthread_exit(NULL);
         }
         
+        #ifdef DEBUG
         // Output debug data
         cout << "Sent: " << message.printableMessage << endl;
+        #endif
 
         // 100 milliseconds (10 Hz)
         usleep(100000); 

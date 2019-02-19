@@ -6,7 +6,6 @@
  * This header file contains the class, property, and method
  * definitions for the Message class.
 */
-
 #include <string>
 
 // 32 byte message buffer size

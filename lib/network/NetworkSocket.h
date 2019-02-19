@@ -24,6 +24,7 @@
 #include <string>            // For string
 #include <exception>         // For exception class
 #include <stdlib.h>
+#include "Message.hpp"
 
 using namespace std;
 
@@ -156,6 +157,14 @@ public:
    *   @exception SocketException thrown if unable to send data
    */
   void send(const void *buffer, int bufferLen) throw(SocketException);
+
+  /**
+   *   Write the given Message object to this socket. Call connect() before
+   *   calling send()
+   *   @param message message to be sent
+   *   @exception SocketException thrown if unable to send data
+   */
+  void send(Message message) throw(SocketException);
 
   /**
    *   Read into the given buffer up to bufferLen bytes data from this

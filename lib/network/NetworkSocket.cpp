@@ -200,6 +200,11 @@ void CommunicatingSocket::send(const void *buffer, int bufferLen)
   }
 }
 
+void CommunicatingSocket::send(Message message)
+    throw(SocketException) {
+  this->send(message.message, message.length());
+}
+
 int CommunicatingSocket::recv(void *buffer, int bufferLen) 
     throw(SocketException) {
   int rtn;
