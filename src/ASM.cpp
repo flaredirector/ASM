@@ -111,7 +111,7 @@ void ASM::handleConnection(ThreadTask *task) {
     #endif
         // If not debug, set distance to LIDAR distance
         #ifndef DEBUG
-        distance = task->lidar->getDistance()
+        distance = task->lidar->getDistance();
         #endif
 
         // Encode altitude into string for TCP packet transmission
