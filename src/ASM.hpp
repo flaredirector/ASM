@@ -7,7 +7,7 @@
  * definitions for the ASM class.
 */
 
-#include "ThreadTask.h"
+#include "ThreadTask.hpp"
 
 // 32 byte message buffer size
 #define RCVBUFSIZE 32    
@@ -28,7 +28,16 @@ class ASM {
     private:
         LIDARInterface *lidar;
         int port;
-        void handleConnection(ThreadTask*);
+        bool reportingToggle;
+
+        void handleEvent(string event, int data);
+
+        void sendAltitudeDataTask(ThreadTask*);
+        void handleIncomingClientMessage(ThreadTask*);
+
         void *threadMain(void *);
+        void *clientMessage(void *);
+
         static void *threadMainHelper(void *args);
+        static void *clientMessageHelper(void *args);
 };

@@ -7,7 +7,7 @@
  * details for the ThreadTask class.
  */
 
-#include "ThreadTask.h"
+#include "ThreadTask.hpp"
 
 /**
  * ThreadTask

@@ -26,6 +26,27 @@ Message::Message(string event, int data) {
 }
 
 /**
+ * Message
+ ** Instantiates new Message instance with received client message buffer
+ ** and parses the buffer into an event and data.
+ * @param {receivedMessage} The string received from the client
+ */
+Message::Message(string receivedMessage) {
+    string event, data, delimeter = ":";
+    size_t pos = 0;
+    while ((pos = receivedMessage.find(delimeter)) != string::npos) {
+        // Assign event
+        event = receivedMessage.substr(0, pos);
+        receivedMessage.erase(0, pos + delimeter.length());
+    }
+    // Assgin data
+    data = receivedMessage;
+    
+    this->event = event;
+    this->data = stoi(data);
+}
+
+/**
  * encode
  ** Encodes the event string and data into a transmittable message
  */

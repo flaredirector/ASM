@@ -21,12 +21,11 @@
 class Message {
     public:
         Message(std::string event, int data);
+        Message(std::string receivedMessage);
         char *encode();
         int length();
         char *message;
         std::string printableMessage;
-    
-    private:
         std::string event;
         int data;
 };

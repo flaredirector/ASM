@@ -7,7 +7,7 @@
  * starts the ASM code.
  */
 
-#include "ASM.h"
+#include "ASM.hpp"
 #include <iostream>
 
 using namespace std;

@@ -8,6 +8,7 @@
 #include "../lib/network/NetworkSocket.h"  // For Socket and SocketException
 #include <iostream>           // For cerr and cout
 #include <stdlib.h>
+#include <string.h>
 
 using namespace std;
 
@@ -26,6 +27,7 @@ int main(int argc, char *argv[]) {
     // Establish connection with the echo server
     TCPSocket *socket = new TCPSocket(serverAddress, echoServerPort);
 
+    int counter = 0;
     while (1) {
       // Prepare to receive message
       char echoBuffer[RCVBUFSIZE + 1];    // Buffer for echo string + \0
@@ -43,6 +45,23 @@ int main(int argc, char *argv[]) {
       totalBytesReceived += bytesReceived;     // Keep tally of total bytes
       echoBuffer[bytesReceived] = '\0';        // Terminate the string!
       cout << echoBuffer;                      // Print the echo buffer
+
+      // if (counter % 10 == 0) {
+      //   char message[32];
+      //   stpcpy(message, "calibrate:1");
+      //   socket->send(message, strlen(message));
+      // }
+
+      if (counter == 100)
+        counter = 0;
+      
+      if (counter == 30) {
+        char message[32];
+        stpcpy(message, "reportingToggle:0");
+        socket->send(message, strlen(message));
+      }
+
+      counter++;
       
       cout << endl;
       // Destructor closes the socket
