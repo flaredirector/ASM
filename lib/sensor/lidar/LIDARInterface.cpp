@@ -1,4 +1,4 @@
-#include "LIDARInterface.h"
+#include "LIDARInterface.hpp"
 
 #ifndef DEBUG
 using namespace std;

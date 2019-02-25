@@ -49,6 +49,7 @@ Message::Message(string receivedMessage) {
 /**
  * encode
  ** Encodes the event string and data into a transmittable message
+ * @return {char*} The encoded message
  */
 char * Message::encode() {
     char message[BUFSIZE];
@@ -62,6 +63,7 @@ char * Message::encode() {
 /**
  * length
  ** Returns the length of the encoded message
+ * @return {int} The length of the mesage
  */
 int Message::length() {
     return strlen(this->message);

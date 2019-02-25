@@ -1,7 +1,7 @@
 /**
  * Flare Director
  * ASM
- * ASM.h
+ * ASM.hpp
  * 
  * This header file contains the class, property, and method
  * definitions for the ASM class.
@@ -28,9 +28,9 @@ class ASM {
     private:
         LIDARInterface *lidar;
         int port;
-        bool reportingToggle;
 
         void handleEvent(string event, int data);
+        void listenForConnections(TCPServerSocket *serverSocket);
 
         void sendAltitudeDataTask(ThreadTask*);
         void handleIncomingClientMessage(ThreadTask*);

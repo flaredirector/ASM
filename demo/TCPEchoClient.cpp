@@ -5,7 +5,7 @@
  * 
  */
 
-#include "../lib/network/NetworkSocket.h"  // For Socket and SocketException
+#include "../lib/network/NetworkSocket.hpp"  // For Socket and SocketException
 #include <iostream>           // For cerr and cout
 #include <stdlib.h>
 #include <string.h>

@@ -17,7 +17,7 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "NetworkSocket.h"
+#include "NetworkSocket.hpp"
 
 #ifdef WIN32
   #include <winsock.h>         // For socket(), connect(), send(), and recv()
@@ -34,6 +34,7 @@
 #endif
 
 #include <errno.h>             // For errno
+#include <iostream>
 
 using namespace std;
 
@@ -108,6 +109,7 @@ Socket::~Socket() {
     ::close(sockDesc);
   #endif
   sockDesc = -1;
+  cout << "deallocating socket" << endl;
 }
 
 string Socket::getLocalAddress() throw(SocketException) {

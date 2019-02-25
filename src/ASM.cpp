@@ -17,9 +17,11 @@
 
 using namespace std;
 
+bool reportingToggle = true;
+
 /**
  * ASM
- ** Instantiates new ASM instance with port argument.
+ ** Instantiates new ASM instance with specified port.
  * @param {port} The port to send/receive messages on
  */
 ASM::ASM(unsigned short int port) {
@@ -27,7 +29,7 @@ ASM::ASM(unsigned short int port) {
     this->port = port;
 
     // Setup toggles
-    this->reportingToggle = true;
+    //this->reportingToggle = true;
 
     #ifndef DEBUG
     // Initialize new LIDAR interface
@@ -65,6 +67,16 @@ void ASM::start(void) {
     }
     #endif
 
+    // Start listening for connections
+    this->listenForConnections(serverSocket);    
+}
+
+/**
+ * listenForConnections
+ ** Begins listening for client connections and handling them
+ * @param {serverSocket} The TCPServerSocket instance to listen on
+ */
+void ASM::listenForConnections(TCPServerSocket *serverSocket) {
     // Run forever  
     for (;;) {      
         cout << "Waiting for Client Connection..." << endl;
@@ -105,6 +117,12 @@ void ASM::start(void) {
     }
 }
 
+/**
+ * handleIncomingClientMessage
+ ** Determines what to execute based on the received event
+ * @param {event} The event received from the client
+ * @param {data} The data passed with the event
+ */
 void ASM::handleEvent(string event, int data) {
     string debugMessage;
     // Decide what to do based on received event
@@ -112,7 +130,8 @@ void ASM::handleEvent(string event, int data) {
         debugMessage = CALIBRATION_EVENT;
     } else if (event == REPORTING_TOGGLE_EVENT) {
         debugMessage = REPORTING_TOGGLE_EVENT;
-        this->reportingToggle = data ? true : false;
+        //reportingToggle = data ? true : false;
+        cout << this->port << endl;
     } else {
         debugMessage = "OTHER";
     }
@@ -126,9 +145,9 @@ void ASM::handleEvent(string event, int data) {
  */
 void ASM::handleIncomingClientMessage(ThreadTask *task) {
     // Check if there is any received message from client
-    char buffer[RCVBUFSIZE];
-    int recvMsgSize;
     try {
+        char buffer[RCVBUFSIZE];
+        int recvMsgSize;
         while ((recvMsgSize = task->clientSocket->recv(buffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
             // Convert into string for easier use
             string receivedMessage = buffer; 
@@ -139,11 +158,25 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
             Message message = Message(receivedMessage);
 
             // Pass message context to event handler
-            this->handleEvent(message.event, message.data);
+            //this->handleEvent(message.event, message.data);
+            string event = message.event;
+            int data = message.data;
+            string debugMessage;
+            // Decide what to do based on received event
+            if (event == CALIBRATION_EVENT) {
+                debugMessage = CALIBRATION_EVENT;
+            } else if (event == REPORTING_TOGGLE_EVENT) {
+                debugMessage = REPORTING_TOGGLE_EVENT;
+                //reportingToggle = data ? true : false;
+                //cout << this->port << endl;
+            } else {
+                debugMessage = "OTHER";
+            }
+            cout << "EVENT: " + debugMessage << endl;
         }
     } catch (SocketException &e) {
         cout << e.what() << endl;
-        pthread_exit(NULL); 
+        //pthread_exit(NULL); 
     }
 }
 
@@ -157,12 +190,13 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
     int distance = 0;
     #ifndef DEBUG
     // If not debug, loop unless LIDAR returns error
-    while (task->lidar->err >= 0 && this->reportingToggle) {
+    while (task->lidar->err >= 0) {
     #else
     // If debug, init distance and loop forever
     distance = 120;
-    while (1 && this->reportingToggle) {
+    while (1) {
     #endif
+    if (reportingToggle) {
         // If not debug, set distance to LIDAR distance
         #ifndef DEBUG
         distance = task->lidar->getDistance();
@@ -183,9 +217,6 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
         // Output debug data
         cout << "Sent: " << message.printableMessage << endl;
 
-        // 100 milliseconds (10 Hz)
-        usleep(100000); 
-
         #ifdef DEBUG
         distance--;
 
@@ -193,6 +224,10 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
         if (distance < 0)
             distance = 120;
         #endif
+    }
+
+    // 100 milliseconds (10 Hz)
+    usleep(100000); 
     }
 }
 
@@ -213,11 +248,18 @@ void *ASM::threadMain(void *args) {
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
     // if ((TCPSocket *) ((ThreadTask *) args)->clientSocket != NULL)
-        //delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+       // delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
 
     return NULL;
 }
 
+/**
+ * clientMessage
+ ** Method that executes when pthread_create is called which
+ ** controls critical section of handleIncomingClientMessage and deallocates 
+ ** socket memory after completion.
+ * @param {args} The context passed during thread creation
+ */
 void *ASM::clientMessage(void *args) {
     // Guarantees that thread resources are deallocated upon return  
     pthread_detach(pthread_self()); 
@@ -227,7 +269,7 @@ void *ASM::clientMessage(void *args) {
 
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
-    delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+    //delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
 
     return NULL;
 }
@@ -243,8 +285,8 @@ void *ASM::threadMainHelper(void *args) {
 }
 
 /**
- * threadMainHelper
- ** Helper method that enables threadMain to get called in 
+ * clientMessageHelper
+ ** Helper method that enables clientMessage to get called in 
  ** pthread_create.
  * @param {args} The ThreadTask passed during thread creation.
  */
