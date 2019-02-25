@@ -24,6 +24,7 @@ class ASM {
         ASM(unsigned short int port);
         ~ASM();
         void start(void);
+        TCPServerSocket *serverSocket;
     
     private:
         LIDARInterface *lidar;

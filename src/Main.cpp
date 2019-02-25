@@ -9,8 +9,17 @@
 
 #include "ASM.hpp"
 #include <iostream>
+#include <signal.h>
 
 using namespace std;
+
+ASM *sensorModule;
+
+void quitHandler(int sig_num) {
+  cout << "Quitting program..." << endl;
+  delete sensorModule->serverSocket;
+  exit(0);
+}
 
 /**
  * main
@@ -30,7 +39,9 @@ int main(int argc, char *argv[]) {
 
     try {
       	// Initialize the ASM Software
-      	ASM *sensorModule = new ASM(serverPort);
+      	sensorModule = new ASM(serverPort);
+
+        signal(SIGINT, quitHandler);
 
       	// Start the TCP Server
       	sensorModule->start();

@@ -29,7 +29,7 @@ ASM::ASM(unsigned short int port) {
     this->port = port;
 
     // Setup toggles
-    //this->reportingToggle = true;
+    // this->reportingToggle = true;
 
     #ifndef DEBUG
     // Initialize new LIDAR interface
@@ -48,10 +48,10 @@ void ASM::start(void) {
     // a broken pipe signal. 
     sigignore(SIGPIPE); // Do not remove
 
-    TCPServerSocket *serverSocket;
+    // TCPServerSocket *serverSocket;
     try {
         // Socket descriptor for server
-        serverSocket = new TCPServerSocket(this->port);  
+        this->serverSocket = new TCPServerSocket(this->port);  
     } catch (SocketException &e) {
         // Print exception description
         cerr << e.what() << endl;
@@ -68,7 +68,7 @@ void ASM::start(void) {
     #endif
 
     // Start listening for connections
-    this->listenForConnections(serverSocket);    
+    this->listenForConnections(this->serverSocket);    
 }
 
 /**

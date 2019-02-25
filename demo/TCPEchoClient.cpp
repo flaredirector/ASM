@@ -15,13 +15,13 @@ using namespace std;
 const int RCVBUFSIZE = 32;    // Size of receive buffer
 
 int main(int argc, char *argv[]) {
-  if ((argc < 2) || (argc > 3)) {     // Test for correct number of arguments
-    cerr << "Usage: " << argv[0] << " <Server> [<Server Port>]" << endl;
+  if ((argc < 1) || (argc > 2)) {     // Test for correct number of arguments
+    cerr << "Usage: " << argv[0] << " <Server Port> [<Server>]" << endl;
     exit(1);
   }
 
-  string serverAddress = argv[1]; // First arg: server address
-  unsigned short echoServerPort = (argc == 3) ? atoi(argv[2]) : 7;
+  string serverAddress = (argc == 3) ? argv[2] : "127.0.0.1"; // First arg: server address
+  unsigned short echoServerPort = atoi(argv[2]);
 
   try {
     // Establish connection with the echo server
