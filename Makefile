@@ -7,7 +7,7 @@
 #
 
 CXX = g++
-CXXFLAGS = -Wall -ansi -pedantic -g -lpthread
+CXXFLAGS = -Wall -pedantic -g -lpthread
 
 # Targets
 LIDAR = lib/sensor/lidar/*.cpp
