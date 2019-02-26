@@ -22,10 +22,9 @@ class Message {
     public:
         Message(std::string event, int data);
         Message(std::string receivedMessage);
-        char *encode();
-        int length();
-        char *message;
-        std::string printableMessage;
+        void encode();
+        std::string message;
         std::string event;
         int data;
+        int messageLength;
 };

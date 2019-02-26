@@ -164,7 +164,7 @@ public:
    *   @param message message to be sent
    *   @exception SocketException thrown if unable to send data
    */
-  void send(Message message) throw(SocketException);
+  void send(Message *message) throw(SocketException);
 
   /**
    *   Read into the given buffer up to bufferLen bytes data from this

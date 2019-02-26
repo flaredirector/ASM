@@ -35,6 +35,8 @@
 
 #include <errno.h>             // For errno
 #include <iostream>
+#include <string.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -109,7 +111,6 @@ Socket::~Socket() {
     ::close(sockDesc);
   #endif
   sockDesc = -1;
-  cout << "deallocating socket" << endl;
 }
 
 string Socket::getLocalAddress() throw(SocketException) {
@@ -202,9 +203,9 @@ void CommunicatingSocket::send(const void *buffer, int bufferLen)
   }
 }
 
-void CommunicatingSocket::send(Message message)
+void CommunicatingSocket::send(Message *message)
     throw(SocketException) {
-  this->send(message.message, message.length());
+    this->send(message->message.c_str(), message->messageLength);
 }
 
 int CommunicatingSocket::recv(void *buffer, int bufferLen) 

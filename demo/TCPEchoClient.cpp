@@ -8,8 +8,6 @@
 #include "../lib/network/NetworkSocket.hpp"  // For Socket and SocketException
 #include <iostream>           // For cerr and cout
 #include <stdlib.h>
-#include <string.h>
-
 
 using namespace std;
 
@@ -27,17 +25,15 @@ int main(int argc, char *argv[]) {
     TCPSocket *socket = new TCPSocket(serverAddress, echoServerPort);
 
     int counter = 0;
-    while (1) {
-      cout << "Received: ";  // Setup to print the echoed string
+    char buffer[BUFSIZE];
+    int recvMsgSize;
+    while ((recvMsgSize = socket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
+      // Terminate string
+      buffer[recvMsgSize] = '\0';
 
-      char buffer[BUFSIZE];
-      int recvMsgSize;
-      while ((recvMsgSize = socket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
-          // Convert into string for easier use
-          string receivedMessage = buffer; 
-
-          cout << "RECEIVED MESSAGE: " << receivedMessage << endl;
-      }
+      // Convert into string for easier use
+      string receivedMessage = buffer; 
+      cout << "Received: " << receivedMessage << endl;
 
       if (counter % 30 == 0) {
         char message[32];
@@ -47,7 +43,7 @@ int main(int argc, char *argv[]) {
 
       if (counter == 100)
         counter = 0;
-      
+    
       // if (counter == 30) {
       //   char message[32];
       //   stpcpy(message, "reportingToggle:0");
@@ -55,11 +51,7 @@ int main(int argc, char *argv[]) {
       // }
 
       counter++;
-      
-      cout << endl;
-      // Destructor closes the socket
     }
-
   } catch(SocketException &e) {
     cerr << e.what() << endl;
     exit(1);

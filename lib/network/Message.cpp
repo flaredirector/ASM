@@ -9,7 +9,6 @@
 
 #include "Message.hpp"
 #include <string.h>
-#include <iostream>
 
 using namespace std;
 
@@ -22,7 +21,6 @@ using namespace std;
 Message::Message(string event, int data) {
     this->event = event;
     this->data = data;
-    this->encode();
 }
 
 /**
@@ -51,20 +49,10 @@ Message::Message(string receivedMessage) {
  ** Encodes the event string and data into a transmittable message
  * @return {char*} The encoded message
  */
-char * Message::encode() {
-    char message[BUFSIZE];
-    sprintf(message, "%s:%d\4", this->event.c_str(), this->data);
-    this->message = message;
-    string pm = this->message;
-    this->printableMessage = pm;
-    return this->message;
-}
-
-/**
- * length
- ** Returns the length of the encoded message
- * @return {int} The length of the mesage
- */
-int Message::length() {
-    return strlen(this->message);
+void Message::encode() {
+    char packet[BUFSIZE];
+    sprintf(packet, "%s:%d\4", this->event.c_str(), this->data);
+    this->messageLength = strlen(packet);
+    string pm = packet;
+    this->message = pm;
 }

@@ -139,10 +139,11 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
             cout << "RECEIVED MESSAGE: " << receivedMessage << endl;
 
             // Decode message string into message object
-            Message message = Message(receivedMessage);
+            Message *message = new Message(receivedMessage);
+            message->encode();
 
             // Pass message context to event handler
-            this->handleEvent(message.event, message.data);
+            this->handleEvent(message->event, message->data);
         }
     } catch (SocketException &e) {
         cout << e.what() << endl;
@@ -159,9 +160,11 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
         if (reportingToggle) {
             // Get altitude data from provider
             int distance = task->altitudeProvider->getAltitude();
+            
             // Encode altitude into string for TCP packet transmission
-            Message message = Message(ALTITUDE_EVENT, distance);
-
+            Message *message = new Message(ALTITUDE_EVENT, distance);
+            message->encode();
+             
             // Try sending message over connection
             try {
                 task->clientSocket->send(message);
@@ -172,7 +175,7 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
             }
             
             // Output debug data
-            cout << "Sent: " << message.printableMessage << endl;
+            cout << "Sent: " << message->message << endl;
         }
 
         // 100 milliseconds (10 Hz)
