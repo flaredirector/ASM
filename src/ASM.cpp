@@ -34,8 +34,8 @@ ASM::ASM(unsigned short int port) {
 
 /**
  * start
- ** Starts the event loop which listens for new connections
- ** and spwans a new thread for each connection.
+ ** Initializes new TCP server, starts the altitude data
+ ** acquisition thread, and begins listening for new connections.
  */
 void ASM::start(void) {
     cout << "Initializing ASM and Sensors..." << endl;
@@ -62,7 +62,8 @@ void ASM::start(void) {
 
 /**
  * listenForConnections
- ** Begins listening for client connections and handling them
+ ** Begins listening for client connections and spawns new threads for
+ ** each connection.
  * @param {serverSocket} The TCPServerSocket instance to listen on
  */
 void ASM::listenForConnections(TCPServerSocket *serverSocket) {
@@ -154,7 +155,7 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
  * @param {task} The ThreadTask passed during thread creation
  */
 void ASM::sendAltitudeDataTask(ThreadTask *task) {
-    while (1) {
+    for (;;) {
         if (reportingToggle) {
             // Get altitude data from provider
             int distance = task->altitudeProvider->getAltitude();

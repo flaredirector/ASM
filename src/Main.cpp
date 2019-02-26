@@ -23,7 +23,7 @@ ASM *sensorModule;
  ** port numbers.
  */
 void quitHandler(int sig_num) {
-  cout << endl << "Quitting program..." << endl;
+  cout << endl << "Exiting Sensor Module program..." << endl;
   delete sensorModule->serverSocket;
   exit(0);
 }

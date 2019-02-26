@@ -19,16 +19,16 @@
  */
 AltitudeProvider::AltitudeProvider() {
     #ifndef DEBUG
-    lidar = new LIDARInterface(1);
+    this->lidar = new LIDARInterface(1);
     
     // Attempt connection to the LIDAR interface
-    int err = lidar->connect();
+    int err = this->lidar->connect();
     // Check for error in connecting to the LIDAR interface
     if (err < 0){
-        printf("%d", lidar->err);
+        printf("%d", this->lidar->err);
     }
     #else
-    altitude = 120;
+    this->altitude = 120;
     #endif
 }
 
@@ -40,14 +40,14 @@ AltitudeProvider::AltitudeProvider() {
 void AltitudeProvider::acquireDataLoop() {
     #ifndef DEBUG
     while (lidar->err >= 0) {
-        altitude = lidar->getDistance();
+        this->altitude = this->lidar->getDistance();
         usleep(100000);
     }
     #else
-    while (1) {
-        altitude--;
-        if (altitude < 0)
-            altitude = 120;
+    for (;;) {
+        this->altitude--;
+        if (this->altitude < 0)
+            this->altitude = 120;
         usleep(100000);
     }
     #endif
@@ -58,5 +58,5 @@ void AltitudeProvider::acquireDataLoop() {
  ** Returns the acquired and processed altitude.
  */
 int AltitudeProvider::getAltitude() {
-    return altitude;
+    return this->altitude;
 }
