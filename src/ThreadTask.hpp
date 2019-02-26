@@ -8,7 +8,7 @@
 */
 
 #include "../lib/network/NetworkSocket.hpp"  // For Sockets
-#include "../lib/sensor/lidar/LIDARInterface.hpp" // For Lidar interface
+#include "AltitudeProvider.hpp"
 
 /**
  * @class ThreadTask
@@ -21,6 +21,8 @@ class ThreadTask {
     public:
     LIDARInterface *lidar;
     TCPSocket *clientSocket;
+    AltitudeProvider *altitudeProvider;
     ThreadTask(TCPSocket *cs, LIDARInterface *l);
     ThreadTask(TCPSocket *cs);
+    ThreadTask(TCPSocket *cs, AltitudeProvider *ap);
 };

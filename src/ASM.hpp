@@ -28,6 +28,7 @@ class ASM {
     
     private:
         LIDARInterface *lidar;
+        AltitudeProvider *altitudeProvider;
         int port;
 
         void handleEvent(string event, int data);
@@ -38,7 +39,9 @@ class ASM {
 
         void *threadMain(void *);
         void *clientMessage(void *);
+        void *startAcquiringAltitudeData(void *);
 
         static void *threadMainHelper(void *args);
         static void *clientMessageHelper(void *args);
+        static void *altitudeProviderHelper(void *args);
 };

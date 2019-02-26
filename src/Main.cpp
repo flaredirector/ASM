@@ -16,7 +16,7 @@ using namespace std;
 ASM *sensorModule;
 
 void quitHandler(int sig_num) {
-  cout << "Quitting program..." << endl;
+  cout << endl << "Quitting program..." << endl;
   delete sensorModule->serverSocket;
   exit(0);
 }
@@ -28,19 +28,17 @@ void quitHandler(int sig_num) {
  * @param argv Array of arguments
  */
 int main(int argc, char *argv[]) {
-    // Test for correct number of arguments 
-    if (argc != 2) { 
-      	cerr << "Usage: " << argv[0] << " <Server Port> " << endl;
-      	exit(1);
-    }
-
     // Get port to listen to messages on
-    unsigned short int serverPort = atoi(argv[1]);
+    unsigned short int serverPort = (argc == 2) ? atoi(argv[1]) : 4000;
 
     try {
       	// Initialize the ASM Software
       	sensorModule = new ASM(serverPort);
 
+        // Allows program to continue executing if the program receives
+        // a broken pipe signal. 
+        sigignore(SIGPIPE); // Do not remove
+        // Handle Ctrl+C event
         signal(SIGINT, quitHandler);
 
       	// Start the TCP Server

@@ -25,3 +25,8 @@ ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
 ThreadTask::ThreadTask(TCPSocket *cs) {
     this->clientSocket = cs;
 }
+
+ThreadTask::ThreadTask(TCPSocket *cs, AltitudeProvider *ap) {
+    this->clientSocket = cs;
+    this->altitudeProvider = ap;
+}

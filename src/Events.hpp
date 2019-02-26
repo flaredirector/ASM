@@ -8,6 +8,6 @@
  * control the hardware and send altitude data.
 */
 
-#define CALIBRATION_EVENT "calibration"
+#define CALIBRATION_EVENT "calibrate"
 #define ALTITUDE_EVENT "altitude"
 #define REPORTING_TOGGLE_EVENT "reportingToggle"
