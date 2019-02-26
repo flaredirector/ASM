@@ -40,7 +40,6 @@ ASM::ASM(unsigned short int port) {
 void ASM::start(void) {
     cout << "Initializing ASM and Sensors..." << endl;
 
-    // TCPServerSocket *serverSocket;
     try {
         // Socket descriptor for server
         this->serverSocket = new TCPServerSocket(this->port);  
@@ -157,6 +156,7 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
 void ASM::sendAltitudeDataTask(ThreadTask *task) {
     while (1) {
         if (reportingToggle) {
+            // Get altitude data from provider
             int distance = task->altitudeProvider->getAltitude();
             // Encode altitude into string for TCP packet transmission
             Message message = Message(ALTITUDE_EVENT, distance);
@@ -171,7 +171,7 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
             }
             
             // Output debug data
-            /cout << "Sent: " << message.printableMessage << endl;
+            cout << "Sent: " << message.printableMessage << endl;
         }
 
         // 100 milliseconds (10 Hz)
@@ -219,6 +219,12 @@ void *ASM::clientMessage(void *args) {
     return NULL;
 }
 
+/**
+ * clientMessage
+ ** Method that executes when pthread_create is called which
+ ** controls critical section of the ALtitudeProvider instance.
+ * @param {args} The context passed during thread creation.
+ */
 void *ASM::startAcquiringAltitudeData(void *args) {
     pthread_detach(pthread_self());
 
@@ -247,6 +253,12 @@ void *ASM::clientMessageHelper(void *args) {
     return ((ASM *)args)->clientMessage(args);
 }
 
+/**
+ * clientMessageHelper
+ ** Helper method that enables startAcquiringAltitudeData to 
+ ** get called in pthread_create.
+ * @param {args} The AltitudeProvider instance passed during thread creation.
+ */
 void *ASM::altitudeProviderHelper(void *args) {
     return ((ASM *)args)->startAcquiringAltitudeData(args);
 }

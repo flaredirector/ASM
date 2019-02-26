@@ -12,20 +12,10 @@
 /**
  * ThreadTask
  ** Instantiates new ThreadTask with arguments
- * TODO: Move this to own class file.
  * @param {cs} The new client socket instance
- * @param {l} The instance of the LIDARInterface
+ * @param {l} The instance of the AltitudeProvider interface.
  * 
  */
-ThreadTask::ThreadTask(TCPSocket *cs, LIDARInterface *l) {
-    this->lidar = l;
-    this->clientSocket = cs;
-}
-
-ThreadTask::ThreadTask(TCPSocket *cs) {
-    this->clientSocket = cs;
-}
-
 ThreadTask::ThreadTask(TCPSocket *cs, AltitudeProvider *ap) {
     this->clientSocket = cs;
     this->altitudeProvider = ap;

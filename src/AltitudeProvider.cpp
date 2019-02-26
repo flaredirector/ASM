@@ -1,9 +1,22 @@
+/**
+ * Flare Director
+ * ASM
+ * ASM.cpp
+ * 
+ * This class provides an interface for the software to
+ * easily request what the current detected altitude of
+ * the aircraft is. This class handles the sensor data
+ * acquisition and signal processing.
+ */
+
 #include "AltitudeProvider.hpp"
-#include <unistd.h>
-#include <iostream>
+#include <unistd.h> // for usleep
 
-using namespace std;
-
+/**
+ * Altitude Provider
+ ** Instantiates new AltitudeProvider instance and
+ ** initializes sensor interfaces.
+ */
 AltitudeProvider::AltitudeProvider() {
     #ifndef DEBUG
     lidar = new LIDARInterface(1);
@@ -19,9 +32,12 @@ AltitudeProvider::AltitudeProvider() {
     #endif
 }
 
+/**
+ * acquireDataLoop
+ ** Runs the loop that acquires sensor data and processes
+ ** the data.
+ */
 void AltitudeProvider::acquireDataLoop() {
-    std::cout << "starting sensor data acquisition" << std::endl;
-    
     #ifndef DEBUG
     while (lidar->err >= 0) {
         altitude = lidar->getDistance();
@@ -37,6 +53,10 @@ void AltitudeProvider::acquireDataLoop() {
     #endif
 }
 
+/**
+ * getAltitude
+ ** Returns the acquired and processed altitude.
+ */
 int AltitudeProvider::getAltitude() {
     return altitude;
 }
