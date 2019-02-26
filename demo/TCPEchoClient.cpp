@@ -10,9 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-using namespace std;
 
-const int RCVBUFSIZE = 32;    // Size of receive buffer
+using namespace std;
 
 int main(int argc, char *argv[]) {
   if ((argc < 1) || (argc > 3)) {     // Test for correct number of arguments
@@ -29,22 +28,16 @@ int main(int argc, char *argv[]) {
 
     int counter = 0;
     while (1) {
-      // Prepare to receive message
-      char echoBuffer[RCVBUFSIZE + 1];    // Buffer for echo string + \0
-      int bytesReceived = 0;              // Bytes read on each recv()
-      int totalBytesReceived = 0;         // Total bytes read
+      cout << "Received: ";  // Setup to print the echoed string
 
-      // Receive the same string back from the server
-      cout << "Received: ";               // Setup to print the echoed string
-      // Receive up to the buffer size bytes from the sender
-      if ((bytesReceived = (socket->recv(echoBuffer, RCVBUFSIZE))) <= 0) {
-        cerr << "Unable to read packet" << endl;
-        exit(1);
+      char buffer[BUFSIZE];
+      int recvMsgSize;
+      while ((recvMsgSize = socket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
+          // Convert into string for easier use
+          string receivedMessage = buffer; 
+
+          cout << "RECEIVED MESSAGE: " << receivedMessage << endl;
       }
-      
-      totalBytesReceived += bytesReceived;     // Keep tally of total bytes
-      echoBuffer[bytesReceived] = '\0';        // Terminate the string!
-      cout << echoBuffer;                      // Print the echo buffer
 
       if (counter % 30 == 0) {
         char message[32];
