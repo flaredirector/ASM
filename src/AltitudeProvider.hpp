@@ -17,4 +17,5 @@ class AltitudeProvider {
     private:
         LIDARInterface *lidar;
         int altitude;
+        void setupSonar();
 };
