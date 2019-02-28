@@ -41,7 +41,7 @@ void ASM::start(void) {
     cout << "Initializing ASM and Sensors..." << endl;
 
     try {
-        // Socket descriptor for server
+        // Create new socket descriptor for server
         this->serverSocket = new TCPServerSocket(this->port);  
     } catch (SocketException &e) {
         // Print exception description
@@ -84,18 +84,18 @@ void ASM::listenForConnections(TCPServerSocket *serverSocket) {
         cout << "Client Connected" << endl;
 
         // Create new thread task
-        ThreadTask *ttask = new ThreadTask(clientSocket, this->altitudeProvider);
+        ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider);
 
         // Spawn thread for sending client altitude data
         pthread_t firstThreadID;
-        if (pthread_create(&firstThreadID, NULL, &ASM::threadMainHelper, (void *) ttask) != 0) {
+        if (pthread_create(&firstThreadID, NULL, &ASM::threadMainHelper, (void *) ctx) != 0) {
             cerr << "Unable to create sensor data thread" << endl;
             exit(1);
         }
 
         // Spawn thread for handling when a client sends a message
         pthread_t secondThreadID;
-        if (pthread_create(&secondThreadID, NULL, &ASM::clientMessageHelper, (void *) ttask) != 0) {
+        if (pthread_create(&secondThreadID, NULL, &ASM::clientMessageHelper, (void *) ctx) != 0) {
             cerr << "Unable to create client message thread" << endl;
             exit(1);
         }
@@ -120,21 +120,21 @@ void ASM::handleEvent(string event, int data) {
     } else {
         debugMessage = "OTHER";
     }
-    
+
     cout << "EVENT: " + debugMessage << endl;
 }
 
 /**
  * handleIncomingClientMessage
  ** Executes when a new message is received from a client
- * @param {task} The ThreadTask passed during thread creation
+ * @param {ctx} The ThreadContext passed during thread creation
  */
-void ASM::handleIncomingClientMessage(ThreadTask *task) {
+void ASM::handleIncomingClientMessage(ThreadContext *ctx) {
     // Check if there is any received message from client
     try {
         char buffer[RCVBUFSIZE];
         int recvMsgSize;
-        while ((recvMsgSize = task->clientSocket->recv(buffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
+        while ((recvMsgSize = ctx->clientSocket->recv(buffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
             // Convert into string for easier use
             string receivedMessage = buffer; 
 
@@ -154,20 +154,20 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
 /**
  * handleConnection
  ** Executes when a new connection is received
- * @param {task} The ThreadTask passed during thread creation
+ * @param {ctx} The ThreadTask passed during thread creation
  */
-void ASM::sendAltitudeDataTask(ThreadTask *task) {
+void ASM::sendAltitudeDataTask(ThreadContext *ctx) {
     for (;;) {
         if (reportingToggle) {
             // Get altitude data from provider
-            int distance = task->altitudeProvider->getAltitude();
+            int distance = ctx->altitudeProvider->getAltitude();
             
             // Encode altitude into string for TCP packet transmission
             Message *message = new Message(ALTITUDE_EVENT, distance);
              
             // Try sending message over connection
             try {
-                task->clientSocket->send(message);
+                ctx->clientSocket->send(message);
             // On send error, client is most likely disconnected, so exit thread and cleanup
             } catch (SocketException &e) {
                 cerr << e.what() << endl;
@@ -188,14 +188,14 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
  ** Method that executes when pthread_create is called which
  ** controls critical section of handleConnection and deallocates 
  ** socket memory after completion.
- * @param {args} The context passed during thread creation
+ * @param {ctx} The context passed during thread creation
  */
-void *ASM::threadMain(void *args) {
+void *ASM::threadMain(void *ctx) {
     // Guarantees that thread resources are deallocated upon return  
     pthread_detach(pthread_self()); 
 
     // Extract socket file descriptor from argument  
-    this->sendAltitudeDataTask(((ThreadTask *) args));
+    this->sendAltitudeDataTask(((ThreadContext *) ctx));
 
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
@@ -208,14 +208,14 @@ void *ASM::threadMain(void *args) {
  ** Method that executes when pthread_create is called which
  ** controls critical section of handleIncomingClientMessage and deallocates 
  ** socket memory after completion.
- * @param {args} The context passed during thread creation
+ * @param {ctx} The context passed during thread creation
  */
-void *ASM::clientMessage(void *args) {
+void *ASM::clientMessage(void *ctx) {
     // Guarantees that thread resources are deallocated upon return  
     pthread_detach(pthread_self()); 
 
     // Extract socket file descriptor from argument  
-    this->handleIncomingClientMessage(((ThreadTask *) args));
+    this->handleIncomingClientMessage(((ThreadContext *) ctx));
 
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
@@ -227,14 +227,14 @@ void *ASM::clientMessage(void *args) {
  * clientMessage
  ** Method that executes when pthread_create is called which
  ** controls critical section of the ALtitudeProvider instance.
- * @param {args} The context passed during thread creation.
+ * @param {ctx} The context passed during thread creation.
  */
-void *ASM::startAcquiringAltitudeData(void *args) {
+void *ASM::startAcquiringAltitudeData(void *ctx) {
     // Guarantees that thread resources are deallocated upon return 
     pthread_detach(pthread_self());
 
     // Start the sensor data acquisition loop
-    ((AltitudeProvider *) args)->acquireDataLoop();
+    ((AltitudeProvider *) ctx)->acquireDataLoop();
 
     return NULL;
 }
@@ -243,28 +243,28 @@ void *ASM::startAcquiringAltitudeData(void *args) {
  * threadMainHelper
  ** Helper method that enables threadMain to get called in 
  ** pthread_create.
- * @param {args} The ThreadTask passed during thread creation.
+ * @param {args} The ThreadContext passed during thread creation.
  */
-void *ASM::threadMainHelper(void *args) {
-    return ((ASM *)args)->threadMain(args);
+void *ASM::threadMainHelper(void *ctx) {
+    return ((ASM *)ctx)->threadMain(ctx);
 }
 
 /**
  * clientMessageHelper
  ** Helper method that enables clientMessage to get called in 
  ** pthread_create.
- * @param {args} The ThreadTask passed during thread creation.
+ * @param {args} The ThreadContext passed during thread creation.
  */
-void *ASM::clientMessageHelper(void *args) {
-    return ((ASM *)args)->clientMessage(args);
+void *ASM::clientMessageHelper(void *ctx) {
+    return ((ASM *)ctx)->clientMessage(ctx);
 }
 
 /**
  * clientMessageHelper
  ** Helper method that enables startAcquiringAltitudeData to 
  ** get called in pthread_create.
- * @param {args} The AltitudeProvider instance passed during thread creation.
+ * @param {ctx} The AltitudeProvider instance passed during thread creation.
  */
-void *ASM::altitudeProviderHelper(void *args) {
-    return ((ASM *)args)->startAcquiringAltitudeData(args);
+void *ASM::altitudeProviderHelper(void *ctx) {
+    return ((ASM *)ctx)->startAcquiringAltitudeData(ctx);
 }

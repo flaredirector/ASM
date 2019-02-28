@@ -7,7 +7,7 @@
  * definitions for the ASM class.
 */
 
-#include "ThreadTask.hpp"
+#include "ThreadContext.hpp"
 
 // 32 byte message buffer size
 #define RCVBUFSIZE 32    
@@ -34,8 +34,8 @@ class ASM {
         void handleEvent(string event, int data);
         void listenForConnections(TCPServerSocket *serverSocket);
 
-        void sendAltitudeDataTask(ThreadTask*);
-        void handleIncomingClientMessage(ThreadTask*);
+        void sendAltitudeDataTask(ThreadContext*);
+        void handleIncomingClientMessage(ThreadContext*);
 
         void *threadMain(void *);
         void *clientMessage(void *);

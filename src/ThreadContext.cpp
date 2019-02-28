@@ -1,22 +1,22 @@
 /**
  * Flare Director
  * ASM
- * ThreadTask.cpp
+ * ThreadContext.cpp
  * 
  * This implementation file contains the implementation
  * details for the ThreadTask class.
  */
 
-#include "ThreadTask.hpp"
+#include "ThreadContext.hpp"
 
 /**
- * ThreadTask
- ** Instantiates new ThreadTask with arguments
+ * ThreadContext
+ ** Instantiates new ThreadContext with arguments
  * @param {cs} The new client socket instance
  * @param {l} The instance of the AltitudeProvider interface.
  * 
  */
-ThreadTask::ThreadTask(TCPSocket *cs, AltitudeProvider *ap) {
+ThreadContext::ThreadContext(TCPSocket *cs, AltitudeProvider *ap) {
     this->clientSocket = cs;
     this->altitudeProvider = ap;
 }
