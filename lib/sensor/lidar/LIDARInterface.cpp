@@ -1,21 +1,46 @@
+/**
+ * Flare Director
+ * ASM
+ * LIDARInterface.cpp
+ * 
+ * This file contains the implementation details for the
+ * LIDARInterface class which handles the setup, configuration,
+ * and I2C details for acquiring the LIDAR sensor data.
+ */
+
 #include "LIDARInterface.hpp"
 
 #ifndef DEBUG
 using namespace std;
-LIDARInterface::LIDARInterface (int bus){
+
+/**
+ * LIDARInterface
+ ** Instantiates new LIDARInterface instance and
+ ** and sets up some properties.
+ */
+LIDARInterface::LIDARInterface (void){
   err = 0;
-  adapter_num = bus;
+  adapter_num = 1;
   snprintf(filename, 19, "/dev/i2c-%d", adapter_num);
 }
 
-LIDARInterface::~LIDARInterface(void){
+/**
+ * LIDARInterface
+ ** Closes the I2C data bus on instance deletion.
+ */
+LIDARInterface::~LIDARInterface( void ) {
   printf("Ending Lidar-Lite Session\n");
   if (i2c_bus > 0){
    int e = close(i2c_bus);
   }
 }
 
-int LIDARInterface::connect( void ) {
+/**
+ * connect
+ ** Attempts connection to the sensor over the
+ ** I2C bus.
+ */
+int LIDARInterface::connect( void ){
   printf("Connecting to Lidar: %s\n", filename);
   i2c_bus = open(filename, O_RDWR);
   if (i2c_bus < 0){
@@ -31,7 +56,10 @@ int LIDARInterface::connect( void ) {
   return 0;
 }
 
-
+/**
+ * writeAndWait
+ ** Writes data to the LIDAR.
+ */
 int LIDARInterface::writeAndWait(int writeRegister, int value){
   res = i2c_smbus_write_byte_data(i2c_bus, writeRegister, value);
   usleep(10000);
@@ -44,6 +72,10 @@ int LIDARInterface::writeAndWait(int writeRegister, int value){
   }
 }
 
+/**
+ * readAndWait
+ ** Reads data from the LIDAR.
+ */
 int LIDARInterface::readAndWait(int readRegister){
   res = i2c_smbus_read_byte_data(i2c_bus, readRegister);
   usleep(10000);
@@ -56,6 +88,10 @@ int LIDARInterface::readAndWait(int readRegister){
   }
 }
 
+/**
+ * getDistance
+ ** Gets the reported distance from the LIDAR.
+ */
 int LIDARInterface::getDistance( void ){
   int buf[2];
   int e = 0;
@@ -78,6 +114,10 @@ int LIDARInterface::getDistance( void ){
   return (buf[0] << 8) + buf[1];
 }
 
+/**
+ * getError
+ ** Returns the current error code of the LIDAR.
+ */
 int LIDARInterface::getError(void){
   return err;
 }

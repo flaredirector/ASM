@@ -11,6 +11,7 @@ CXXFLAGS = -Wall -pedantic -g -lpthread
 
 # Targets
 LIDAR = lib/sensor/lidar/*.cpp
+SONAR = lib/sensor/sonar/*.cpp
 NETWORK = lib/network/*.cpp
 SRC = src/*.cpp
 
@@ -27,7 +28,7 @@ client: demo/TCPEchoClient.cpp $(NETWORK)
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp $(NETWORK) $(LIBS)
 
 main: $(SRC) $(NETWORK) $(LIDAR)
-	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread
+	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(SONAR) $(LIBS) -lpthread
 
 debug: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread -DDEBUG -ggdb -O0

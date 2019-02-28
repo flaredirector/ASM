@@ -1,3 +1,12 @@
+/**
+ * Flare Director
+ * ASM
+ * LIDARInterface.hpp
+ * 
+ * This header file contains the class definition
+ * for the LIDARInterface class.
+ */
+
 #ifndef DEBUG
 #ifndef LIDAR_LITE_H
 #define LIDAR_LITE_H
@@ -25,7 +34,7 @@ class LIDARInterface{
     int res;
   public:
     int err;
-    LIDARInterface(int);
+    LIDARInterface(void);
     ~LIDARInterface(void);
     int connect(void);
     int writeAndWait(int, int);

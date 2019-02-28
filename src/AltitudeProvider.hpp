@@ -8,6 +8,7 @@
  */
 
 #include "../lib/sensor/lidar/LIDARInterface.hpp"
+#include "../lib/sensor/sonar/SONARInterface.hpp"
 
 class AltitudeProvider {
     public:
@@ -16,6 +17,6 @@ class AltitudeProvider {
         int getAltitude();
     private:
         LIDARInterface *lidar;
+        SONARInterface *sonar;
         int altitude;
-        void setupSonar();
 };
