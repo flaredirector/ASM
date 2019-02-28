@@ -34,14 +34,14 @@ class ASM {
         void handleEvent(string event, int data);
         void listenForConnections(TCPServerSocket *serverSocket);
 
-        void sendAltitudeDataTask(ThreadContext*);
-        void handleIncomingClientMessage(ThreadContext*);
+        void reportAltitude(ThreadContext*);
+        void handleClientMessage(ThreadContext*);
 
-        void *threadMain(void *);
-        void *clientMessage(void *);
-        void *startAcquiringAltitudeData(void *);
+        void *reportAltitudeCS(void *ctx);
+        void *handleClientMessageCS(void *ctx);
+        void *acquireAltitudeDataCS(void *ctx);
 
-        static void *threadMainHelper(void *args);
-        static void *clientMessageHelper(void *args);
-        static void *altitudeProviderHelper(void *args);
+        static void *reportAltitudeThreadHelper(void *ctx);
+        static void *handleClientMessageThreadHelper(void *ctx);
+        static void *acquireAltitudeDataThreadHelper(void *ctx);
 };
