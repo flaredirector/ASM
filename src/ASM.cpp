@@ -53,7 +53,7 @@ void ASM::start(void) {
     pthread_t altitudeProviderThreadID;
     if (pthread_create(&altitudeProviderThreadID, NULL, 
         &ASM::acquireAltitudeDataThreadHelper, (void *) this->altitudeProvider) != 0) {
-        cerr << "Unable to create altitude provider thread" << endl;
+        cerr << "Unable to create acquireAltitudeDataThreadHelper thread" << endl;
         exit(1);
     }
 
@@ -90,14 +90,14 @@ void ASM::listenForConnections(TCPServerSocket *serverSocket) {
         // Spawn thread for sending client altitude data
         pthread_t firstThreadID;
         if (pthread_create(&firstThreadID, NULL, &ASM::reportAltitudeThreadHelper, (void *) ctx) != 0) {
-            cerr << "Unable to create sensor data thread" << endl;
+            cerr << "Unable to create reportAltitudeThreadHelper thread" << endl;
             exit(1);
         }
 
         // Spawn thread for handling when a client sends a message
         pthread_t secondThreadID;
         if (pthread_create(&secondThreadID, NULL, &ASM::handleClientMessageThreadHelper, (void *) ctx) != 0) {
-            cerr << "Unable to create client message thread" << endl;
+            cerr << "Unable to create handleClientMessageThreadHelper thread" << endl;
             exit(1);
         }
     }
