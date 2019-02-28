@@ -51,7 +51,8 @@ void ASM::start(void) {
 
     // Start the sensor data acquisition thread
     pthread_t altitudeProviderThreadID;
-    if (pthread_create(&altitudeProviderThreadID, NULL, &ASM::acquireAltitudeDataThreadHelper, (void *) this->altitudeProvider) != 0) {
+    if (pthread_create(&altitudeProviderThreadID, NULL, 
+        &ASM::acquireAltitudeDataThreadHelper, (void *) this->altitudeProvider) != 0) {
         cerr << "Unable to create altitude provider thread" << endl;
         exit(1);
     }
@@ -103,7 +104,7 @@ void ASM::listenForConnections(TCPServerSocket *serverSocket) {
 }
 
 /**
- * handleIncomingClientMessage
+ * handleEvent
  ** Determines what to execute based on the received event
  * @param {event} The event received from the client
  * @param {data} The data passed with the event
@@ -152,7 +153,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
 }
 
 /**
- * handleConnection
+ * reportAltitude
  ** Executes when a new connection is received
  * @param {ctx} The ThreadTask passed during thread creation
  */
@@ -184,7 +185,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
 }
 
 /**
- * threadMain
+ * reportAltitudeCS
  ** Method that executes when pthread_create is called which
  ** controls critical section of handleConnection and deallocates 
  ** socket memory after completion.
@@ -204,7 +205,7 @@ void *ASM::reportAltitudeCS(void *ctx) {
 }
 
 /**
- * clientMessage
+ * handleClientMessageCS
  ** Method that executes when pthread_create is called which
  ** controls critical section of handleIncomingClientMessage and deallocates 
  ** socket memory after completion.
@@ -224,7 +225,7 @@ void *ASM::handleClientMessageCS(void *ctx) {
 }
 
 /**
- * clientMessage
+ * acquireAltitudeDataCS
  ** Method that executes when pthread_create is called which
  ** controls critical section of the ALtitudeProvider instance.
  * @param {ctx} The context passed during thread creation.
@@ -240,7 +241,7 @@ void *ASM::acquireAltitudeDataCS(void *ctx) {
 }
 
 /**
- * threadMainHelper
+ * reportAltitudeThreadHelper
  ** Helper method that enables threadMain to get called in 
  ** pthread_create.
  * @param {args} The ThreadContext passed during thread creation.
@@ -250,7 +251,7 @@ void *ASM::reportAltitudeThreadHelper(void *ctx) {
 }
 
 /**
- * clientMessageHelper
+ * handleClientMessageThreadHelper
  ** Helper method that enables clientMessage to get called in 
  ** pthread_create.
  * @param {args} The ThreadContext passed during thread creation.
@@ -260,7 +261,7 @@ void *ASM::handleClientMessageThreadHelper(void *ctx) {
 }
 
 /**
- * clientMessageHelper
+ * acquireAltitudeDataThreadHelper
  ** Helper method that enables startAcquiringAltitudeData to 
  ** get called in pthread_create.
  * @param {ctx} The AltitudeProvider instance passed during thread creation.
