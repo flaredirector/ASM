@@ -110,6 +110,7 @@ void ASM::listenForConnections(TCPServerSocket *serverSocket) {
  */
 void ASM::handleEvent(string event, int data) {
     string debugMessage;
+
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         debugMessage = CALIBRATION_EVENT;
@@ -119,6 +120,7 @@ void ASM::handleEvent(string event, int data) {
     } else {
         debugMessage = "OTHER";
     }
+    
     cout << "EVENT: " + debugMessage << endl;
 }
 
@@ -140,7 +142,6 @@ void ASM::handleIncomingClientMessage(ThreadTask *task) {
 
             // Decode message string into message object
             Message *message = new Message(receivedMessage);
-            message->encode();
 
             // Pass message context to event handler
             this->handleEvent(message->event, message->data);
@@ -163,7 +164,6 @@ void ASM::sendAltitudeDataTask(ThreadTask *task) {
             
             // Encode altitude into string for TCP packet transmission
             Message *message = new Message(ALTITUDE_EVENT, distance);
-            message->encode();
              
             // Try sending message over connection
             try {
@@ -230,8 +230,10 @@ void *ASM::clientMessage(void *args) {
  * @param {args} The context passed during thread creation.
  */
 void *ASM::startAcquiringAltitudeData(void *args) {
+    // Guarantees that thread resources are deallocated upon return 
     pthread_detach(pthread_self());
 
+    // Start the sensor data acquisition loop
     ((AltitudeProvider *) args)->acquireDataLoop();
 
     return NULL;

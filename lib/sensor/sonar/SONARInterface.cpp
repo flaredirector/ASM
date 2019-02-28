@@ -24,6 +24,7 @@
  ** and sets up some properties.
  */
 SONARInterface::SONARInterface() {
+    // Set initial error code to 0 (OK)
     this->err = 0;
 }
 
@@ -92,6 +93,7 @@ int SONARInterface::setup() {
 int SONARInterface::getDistance() {
     //Filestream, buffer to store in, number of bytes to read (max)
     int rx_length = read(this->uartFilestream, (void*)this->rx_buffer, 255);
+
     if (rx_length < 0) {
         // An error occured (will occur if there are no bytes)
     } else if (rx_length == 0) {
@@ -102,10 +104,14 @@ int SONARInterface::getDistance() {
         // Check for valid buffer data
         if (this->rx_buffer[0] == 'R') {
             char data_buffer[4];
+            // Fill data buffer with rx_buffer, but without 'R'
             for (int index = 0; index < 4; index++) {
                 data_buffer[index] = this->rx_buffer[index+1];
             }
+
+            // Convert data_buffer character array to integer
             int sonarData = strtol(data_buffer, NULL, 10); 
+
             return sonarData;
         }
     }

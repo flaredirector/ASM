@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
         // Handle Ctrl+C event
         signal(SIGINT, quitHandler);
 
-      	// Start the Sensor Module code
+      	// Start the Sensor Module
       	sensorModule->start();
     // Catch generic exception
     } catch (...) {

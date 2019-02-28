@@ -21,6 +21,7 @@ using namespace std;
 Message::Message(string event, int data) {
     this->event = event;
     this->data = data;
+    this->encode();
 }
 
 /**
@@ -42,6 +43,7 @@ Message::Message(string receivedMessage) {
     
     this->event = event;
     this->data = stoi(data);
+    this->encode();
 }
 
 /**
