@@ -9,7 +9,6 @@
 
 #include "Message.hpp"
 #include <string.h>
-#include <iostream>
 
 using namespace std;
 
@@ -21,7 +20,6 @@ using namespace std;
  */
 Message::Message(string event, int data) {
     this->addEvent(event, data);
-    this->encode();
 }
 
 /**
@@ -31,28 +29,30 @@ Message::Message(string event, int data) {
  * @param {receivedMessage} The string received from the client
  */
 Message::Message(string receivedMessage) {
+    vector<string> events;
     string messageDelimeter = "|";
     size_t pos = 0;
 
     // Get each event encoded in the message
     while ((pos = receivedMessage.find(messageDelimeter)) != string::npos) {
-        this->events.push_back(receivedMessage.substr(0, pos));
+        events.push_back(receivedMessage.substr(0, pos));
         receivedMessage.erase(0, pos + messageDelimeter.length());
     }
 
-    this->events.push_back(receivedMessage);
+    // Add event to vector of events
+    events.push_back(receivedMessage);
 
     // Fore each event, parse the event name and data
-    for (int i = 0; i < this->events.size(); i++) {
+    for (int i = 0; i < events.size(); i++) {
         string event, data, eventDelimeter = ":";
         size_t pos = 0;
 
-        while ((pos = this->events[i].find(eventDelimeter)) != string::npos) {
-            event = this->events[i].substr(0, pos);
-            this->events[i].erase(0, pos + eventDelimeter.length());
+        while ((pos = events[i].find(eventDelimeter)) != string::npos) {
+            event = events[i].substr(0, pos);
+            events[i].erase(0, pos + eventDelimeter.length());
         }
 
-        data = this->events[i];
+        data = events[i];
 
         // Create new event object and assign respective data.
         Event newEvent;
@@ -75,7 +75,6 @@ void Message::addEvent(string event, int data) {
     newEvent.data = data;
 
     this->parsedEvents.push_back(newEvent);
-    this->encode();
 }
 
 /**

@@ -67,7 +67,6 @@ void ASM::start(void) {
  * listenForConnections
  ** Begins listening for client connections and spawns new threads for
  ** each connection.
- * @param {serverSocket} The TCPServerSocket instance to listen on
  */
 void ASM::listenForConnections() {
     // Run forever  
@@ -173,6 +172,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             Message *message = new Message(ALTITUDE_EVENT, altitude);
             message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
             message->addEvent(SONAR_DATA_EVENT, altitude + 4);
+            message->encode();
 
             // Try sending message over connection
             try {
@@ -182,9 +182,12 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 cerr << e.what() << endl;
                 return;
             }
-            
+
+            // Free up message memory to prevent memory leak
+            delete message;
+
             // Output debug data
-            cout << "Sent: " << message->message << endl;
+            // cout << "Sent: " << message->message << endl;
         }
 
         // 100 milliseconds (10 Hz)
