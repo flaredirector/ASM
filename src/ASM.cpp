@@ -25,6 +25,8 @@ bool reportingToggle = true;
  * @param {port} The port to send/receive messages on
  */
 ASM::ASM(unsigned short int port) {
+    cout << "Initializing ASM and Sensors..." << endl;
+    
     // Set port to passed in port number
     this->port = port;
 
@@ -38,7 +40,7 @@ ASM::ASM(unsigned short int port) {
  ** acquisition thread, and begins listening for new connections.
  */
 void ASM::start(void) {
-    cout << "Initializing ASM and Sensors..." << endl;
+    cout << "Starting ASM..." << endl;
 
     try {
         // Create new socket descriptor for server
