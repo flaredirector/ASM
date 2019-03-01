@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
       cout << "Received: " << receivedMessage << endl;
 
       if (counter % 30 == 0) {
-        char message[32];
+        char message[64];
         stpcpy(message, "calibrate:1");
         socket->send(message, strlen(message));
       }

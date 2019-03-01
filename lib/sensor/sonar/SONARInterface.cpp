@@ -5,7 +5,7 @@
  * 
  * This file contains the implementation details for the
  * SONARInteface class which handles the setup, configutation, and
- * sertil (TTY) details for acquiring the SONAR sensor data.
+ * serial (TTL) details for acquiring the SONAR sensor data.
  */
 
 #include "SONARInterface.hpp"

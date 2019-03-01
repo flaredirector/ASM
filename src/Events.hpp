@@ -13,3 +13,5 @@
 #define REPORTING_TOGGLE_EVENT "reportingToggle"
 #define SENSOR_FAILURE_EVENT "sensorFailure"
 #define HARDWARE_FAILURE_EVENT "hardwareFailure"
+#define LIDAR_DATA_EVENT "lidarData"
+#define SONAR_DATA_EVENT "sonarData"

@@ -7,9 +7,15 @@
  * definitions for the Message class.
 */
 #include <string>
+#include <vector>
 
 // 32 byte message buffer size
-#define BUFSIZE 32    
+#define BUFSIZE 64
+
+typedef struct event {
+    std::string event;
+    int data;
+} Event;
 
 /**
  * @class ASM
@@ -23,8 +29,9 @@ class Message {
         Message(std::string event, int data);
         Message(std::string receivedMessage);
         void encode();
+        void addEvent(std::string event, int data);
         std::string message;
-        std::string event;
-        int data;
         int messageLength;
+        std::vector<std::string> events;
+        std::vector<Event> parsedEvents;
 };

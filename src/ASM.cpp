@@ -144,8 +144,11 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             // Decode message string into message object
             Message *message = new Message(receivedMessage);
 
-            // Pass message context to event handler
-            this->handleEvent(message->event, message->data);
+            // Loop through the parsed events in the decoded message and determine what to do
+            // for each event.
+            for (int i = 0; i < message->parsedEvents.size(); i++) {
+                this->handleEvent(message->parsedEvents[i].event, message->parsedEvents[i].data);
+            }
         }
     } catch (SocketException &e) {
         cout << e.what() << endl;
@@ -161,11 +164,13 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     for (;;) {
         if (reportingToggle) {
             // Get altitude data from provider
-            int distance = ctx->altitudeProvider->getAltitude();
+            int altitude = ctx->altitudeProvider->getAltitude();
             
             // Encode altitude into string for TCP packet transmission
-            Message *message = new Message(ALTITUDE_EVENT, distance);
-             
+            Message *message = new Message(ALTITUDE_EVENT, altitude);
+            message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
+            message->addEvent(SONAR_DATA_EVENT, altitude + 4);
+
             // Try sending message over connection
             try {
                 ctx->clientSocket->send(message);
@@ -180,7 +185,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
         }
 
         // 100 milliseconds (10 Hz)
-        usleep(100000); 
+        usleep(1000000); 
     }
 }
 
