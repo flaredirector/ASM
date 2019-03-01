@@ -92,5 +92,4 @@ void Message::encode() {
     }
     packet[packet.size()] = '\4';
     this->message = packet;
-    this->messageLength = packet.size();
 }

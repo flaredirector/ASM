@@ -168,7 +168,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Get altitude data from provider
             int altitude = ctx->altitudeProvider->getAltitude();
             
-            // Encode altitude into string for TCP packet transmission
+            // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, altitude);
             message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
             message->addEvent(SONAR_DATA_EVENT, altitude + 4);

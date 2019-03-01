@@ -205,7 +205,7 @@ void CommunicatingSocket::send(const void *buffer, int bufferLen)
 
 void CommunicatingSocket::send(Message *message)
     throw(SocketException) {
-    this->send(message->message.c_str(), message->messageLength);
+    this->send(message->message.c_str(), message->message.size());
 }
 
 int CommunicatingSocket::recv(void *buffer, int bufferLen) 
