@@ -47,9 +47,13 @@ AltitudeProvider::AltitudeProvider() {
  */
 void AltitudeProvider::acquireDataLoop() {
     #ifndef DEBUG
-    while (lidar->err >= 0 && sonar->err >= 0) {
-        cout << this->sonar->getDistance() << endl;
-        this->altitude = this->lidar->getDistance();
+    // Acquire data while both sensors are operational
+    while (this->lidar->err >= 0 && this->sonar->err >= 0) {
+        this->sonarDistance = this->sonar->getDistance();
+        this->lidarDistance = this->lidar->getDistance();
+
+        // TODO: Perform sensor weighting and signal processing
+        this->altitude = this->lidarDistance;
     #else
     for (;;) {
         this->altitude--;

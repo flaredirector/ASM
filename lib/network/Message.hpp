@@ -9,9 +9,12 @@
 #include <string>
 #include <vector>
 
-// 32 byte message buffer size
+// Message buffer size
 #define BUFSIZE 64
 
+/**
+ * Event structure to hold event name and data
+ */
 typedef struct event {
     std::string event;
     int data;

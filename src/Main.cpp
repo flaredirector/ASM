@@ -42,8 +42,8 @@ int main(int argc, char *argv[]) {
       	// Initialize the ASM Software
       	sensorModule = new ASM(serverPort);
 
-        // Allows program to continue executing if the program receives
-        // a broken pipe signal. 
+        //! Allows program to continue executing if the program receives
+        //! a broken pipe signal. 
         sigignore(SIGPIPE);
 
         // Handle Ctrl+C event

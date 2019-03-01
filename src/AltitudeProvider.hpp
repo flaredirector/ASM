@@ -19,4 +19,6 @@ class AltitudeProvider {
         LIDARInterface *lidar;
         SONARInterface *sonar;
         int altitude;
+        int lidarDistance;
+        int sonarDistance;
 };

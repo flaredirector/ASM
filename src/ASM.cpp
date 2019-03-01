@@ -147,7 +147,8 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             // Loop through the parsed events in the decoded message and determine what to do
             // for each event.
             for (int i = 0; i < message->parsedEvents.size(); i++) {
-                this->handleEvent(message->parsedEvents[i].event, message->parsedEvents[i].data);
+                Event parsedEvent = message->parsedEvents[i];
+                this->handleEvent(parsedEvent.event, parsedEvent.data);
             }
         }
     } catch (SocketException &e) {
