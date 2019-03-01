@@ -185,7 +185,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
         }
 
         // 100 milliseconds (10 Hz)
-        usleep(1000000); 
+        usleep(100000); 
     }
 }
 
