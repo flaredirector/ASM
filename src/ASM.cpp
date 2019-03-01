@@ -170,8 +170,14 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, altitude);
+            
+            #ifdef DEBUG
             message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
             message->addEvent(SONAR_DATA_EVENT, altitude + 4);
+            #else
+            message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
+            message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            #endif
             message->encode();
 
             // Try sending message over connection

@@ -73,7 +73,6 @@ void Message::addEvent(string event, int data) {
     Event newEvent;
     newEvent.event = event;
     newEvent.data = data;
-
     this->parsedEvents.push_back(newEvent);
 }
 
