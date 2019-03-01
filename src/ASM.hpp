@@ -32,7 +32,7 @@ class ASM {
         int port;
 
         void handleEvent(string event, int data);
-        void listenForConnections(TCPServerSocket *serverSocket);
+        void listenForConnections();
 
         void reportAltitude(ThreadContext*);
         void handleClientMessage(ThreadContext*);

@@ -26,7 +26,7 @@ bool reportingToggle = true;
  */
 ASM::ASM(unsigned short int port) {
     cout << "Initializing ASM and Sensors..." << endl;
-    
+
     // Set port to passed in port number
     this->port = port;
 
@@ -60,7 +60,7 @@ void ASM::start(void) {
     }
 
     // Start listening for connections
-    this->listenForConnections(this->serverSocket);    
+    this->listenForConnections();    
 }
 
 /**
@@ -69,7 +69,7 @@ void ASM::start(void) {
  ** each connection.
  * @param {serverSocket} The TCPServerSocket instance to listen on
  */
-void ASM::listenForConnections(TCPServerSocket *serverSocket) {
+void ASM::listenForConnections() {
     // Run forever  
     for (;;) {      
         cout << "Waiting for Client Connection..." << endl;
@@ -78,7 +78,7 @@ void ASM::listenForConnections(TCPServerSocket *serverSocket) {
         TCPSocket *clientSocket;
         try {
             // Blocks until new connection received.
-            clientSocket = serverSocket->accept();
+            clientSocket = this->serverSocket->accept();
         } catch (SocketException &e) {
             cerr << e.what() << endl;
             exit(1);
