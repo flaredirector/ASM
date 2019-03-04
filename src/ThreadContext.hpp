@@ -21,5 +21,6 @@ class ThreadContext {
     public:
     TCPSocket *clientSocket;
     AltitudeProvider *altitudeProvider;
-    ThreadContext(TCPSocket *cs, AltitudeProvider *ap);
+    ASMToggles *toggles;
+    ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t);
 };

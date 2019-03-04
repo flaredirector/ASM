@@ -9,13 +9,15 @@
 
 #include "../lib/sensor/lidar/LIDARInterface.hpp"
 #include "../lib/sensor/sonar/SONARInterface.hpp"
+#include "ASMToggles.hpp"
 
 class AltitudeProvider {
     public:
-        AltitudeProvider();
+        AltitudeProvider(ASMToggles *asmToggles);
         void acquireDataLoop();
         int getAltitude();
     private:
+        ASMToggles *toggles;
         LIDARInterface *lidar;
         SONARInterface *sonar;
         int altitude;

@@ -17,8 +17,6 @@
 
 using namespace std;
 
-bool reportingToggle = true;
-
 /**
  * ASM
  ** Instantiates new ASM instance with specified port.
@@ -30,8 +28,12 @@ ASM::ASM(unsigned short int port) {
     // Set port to passed in port number
     this->port = port;
 
+    // Setup toggles
+    this->toggles = (ASMToggles *) malloc(sizeof(ASMToggles));
+    this->toggles->reportingToggle = false;
+
     // Create new altitude provider instance
-    this->altitudeProvider = new AltitudeProvider();
+    this->altitudeProvider = new AltitudeProvider(this->toggles);
 }
 
 /**
@@ -60,7 +62,7 @@ void ASM::start(void) {
     }
 
     // Start listening for connections
-    this->listenForConnections();    
+    this->listenForConnections(); 
 }
 
 /**
@@ -72,7 +74,7 @@ void ASM::listenForConnections() {
     // Run forever  
     for (;;) {      
         cout << "Waiting for Client Connection..." << endl;
-
+         
         // Create new clientSoket instance and wait for connection
         TCPSocket *clientSocket;
         try {
@@ -86,7 +88,7 @@ void ASM::listenForConnections() {
         cout << "Client Connected" << endl;
 
         // Create new thread task
-        ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider);
+        ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider, this->toggles);
 
         // Spawn thread for sending client altitude data
         pthread_t firstThreadID;
@@ -110,15 +112,14 @@ void ASM::listenForConnections() {
  * @param {event} The event received from the client
  * @param {data} The data passed with the event
  */
-void ASM::handleEvent(string event, int data) {
+void ASM::handleEvent(string event, int data, ASMToggles *toggles) {
     string debugMessage;
-
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         debugMessage = CALIBRATION_EVENT;
     } else if (event == REPORTING_TOGGLE_EVENT) {
         debugMessage = REPORTING_TOGGLE_EVENT;
-        reportingToggle = data ? true : false;
+        toggles->reportingToggle = data ? true : false;
     } else {
         debugMessage = "OTHER";
     }
@@ -141,7 +142,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             string receivedMessage = buffer; 
 
             cout << "RECEIVED MESSAGE: " << receivedMessage << endl;
-
+            
             // Decode message string into message object
             Message *message = new Message(receivedMessage);
 
@@ -149,7 +150,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             // for each event.
             for (int i = 0; i < message->events.size(); i++) {
                 Event parsedEvent = message->events[i];
-                this->handleEvent(parsedEvent.event, parsedEvent.data);
+                this->handleEvent(parsedEvent.event, parsedEvent.data, ctx->toggles);
             }
         }
     } catch (SocketException &e) {
@@ -164,7 +165,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
  */
 void ASM::reportAltitude(ThreadContext *ctx) {
     for (;;) {
-        if (reportingToggle) {
+        if (ctx->toggles->reportingToggle) {
             // Get altitude data from provider
             int altitude = ctx->altitudeProvider->getAltitude();
             

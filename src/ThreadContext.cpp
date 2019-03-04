@@ -16,7 +16,8 @@
  * @param {l} The instance of the AltitudeProvider interface.
  * 
  */
-ThreadContext::ThreadContext(TCPSocket *cs, AltitudeProvider *ap) {
+ThreadContext::ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t) {
     this->clientSocket = cs;
     this->altitudeProvider = ap;
+    this->toggles = t;
 }

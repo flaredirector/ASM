@@ -29,8 +29,9 @@ class ASM {
     private:
         AltitudeProvider *altitudeProvider;
         int port;
+        ASMToggles *toggles;
 
-        void handleEvent(string event, int data);
+        void handleEvent(string event, int data, ASMToggles *toggles);
         void listenForConnections();
 
         void reportAltitude(ThreadContext*);

@@ -20,7 +20,8 @@ using namespace std;
  ** Instantiates new AltitudeProvider instance and
  ** initializes sensor interfaces.
  */
-AltitudeProvider::AltitudeProvider() {
+AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
+    this->toggles = asmToggles;
     #ifndef DEBUG
     this->lidar = new LIDARInterface();
     this->sonar = new SONARInterface();
@@ -30,10 +31,10 @@ AltitudeProvider::AltitudeProvider() {
     int sonarError = this->sonar->setup();
     // Check for error in connecting to the LIDAR interface
     if (lidarError < 0) {
-        printf("LIDAR ERROR: %d\n", this->lidar->err);
+        cout << "LIDAR ERROR: " << this->lidar->err << endl;
     }
     if (sonarError < 0) {
-        printf("SONAR ERROR: %d\n", this->sonar->err);
+        cout << "SONAR ERROR: " << this->sonar->err << endl;
     }
     #else
     this->altitude = 120;
@@ -60,8 +61,10 @@ void AltitudeProvider::acquireDataLoop() {
         if (this->altitude < 0)
             this->altitude = 120;
     #endif
-
-        usleep(100000); // 10hz
+        if (this->toggles->reportingToggle)
+            usleep(100000); // 10hz
+        else
+            usleep(1000000); // 1hz
     }
 }
 

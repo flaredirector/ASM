@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 		// Establish connection with the echo server
 		TCPSocket *socket = new TCPSocket(serverAddress, echoServerPort);
 
-		int counter = 0;
+		int counter = 0, toggle = 0;
 		char buffer[BUFSIZE];
 		int recvMsgSize;
 		while ((recvMsgSize = socket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
@@ -35,10 +35,12 @@ int main(int argc, char *argv[]) {
 			string receivedMessage = buffer; 
 			cout << "Received: " << receivedMessage << endl;
 
-			if (counter % 30 == 0) {
+			if (counter % 10 == 0) {
 				char message[64];
-				stpcpy(message, "calibrate:1");
+				sprintf(message, "reportingToggle:%d", toggle);
+				// stpcpy(message, "calibrate:1");
 				socket->send(message, strlen(message));
+				toggle ? toggle = 0 : toggle = 1;
 			}
 
 			if (counter == 100)
