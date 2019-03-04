@@ -16,11 +16,11 @@ class AltitudeProvider {
         AltitudeProvider(ASMToggles *asmToggles);
         void acquireDataLoop();
         int getAltitude();
+        int lidarDistance;
+        int sonarDistance;
     private:
         ASMToggles *toggles;
         LIDARInterface *lidar;
         SONARInterface *sonar;
         int altitude;
-        int lidarDistance;
-        int sonarDistance;
 };
