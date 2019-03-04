@@ -34,5 +34,5 @@ class Message {
         void addEvent(std::string event, int data);
         void encode();
         std::string message;
-        std::vector<Event> parsedEvents;
+        std::vector<Event> events;
 };

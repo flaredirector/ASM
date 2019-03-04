@@ -147,8 +147,8 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
 
             // Loop through the parsed events in the decoded message and determine what to do
             // for each event.
-            for (int i = 0; i < message->parsedEvents.size(); i++) {
-                Event parsedEvent = message->parsedEvents[i];
+            for (int i = 0; i < message->events.size(); i++) {
+                Event parsedEvent = message->events[i];
                 this->handleEvent(parsedEvent.event, parsedEvent.data);
             }
         }
@@ -170,7 +170,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, altitude);
-            
+
             #ifdef DEBUG
             message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
             message->addEvent(SONAR_DATA_EVENT, altitude + 4);

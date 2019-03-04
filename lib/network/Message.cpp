@@ -60,7 +60,7 @@ Message::Message(string receivedMessage) {
         newEvent.data = stoi(data);
 
         // Add the new event to the list of parsed events
-        this->parsedEvents.push_back(newEvent);
+        this->events.push_back(newEvent);
     }
 }
 
@@ -73,7 +73,7 @@ void Message::addEvent(string event, int data) {
     Event newEvent;
     newEvent.event = event;
     newEvent.data = data;
-    this->parsedEvents.push_back(newEvent);
+    this->events.push_back(newEvent);
 }
 
 /**
@@ -82,11 +82,11 @@ void Message::addEvent(string event, int data) {
  */
 void Message::encode() {
     string packet;
-    for (int i = 0; i < this->parsedEvents.size(); i++) {
-        packet += this->parsedEvents[i].event;
+    for (int i = 0; i < this->events.size(); i++) {
+        packet += this->events[i].event;
         packet += ":";
-        packet += to_string(this->parsedEvents[i].data);
-        if (i != this->parsedEvents.size()-1)
+        packet += to_string(this->events[i].data);
+        if (i != this->events.size()-1)
             packet += "|";
     }
     packet[packet.size()] = '\4';
