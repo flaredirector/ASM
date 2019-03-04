@@ -23,7 +23,7 @@ class ASM {
     public:
         ASM(unsigned short int port);
         ~ASM();
-        void start(void);
+        void start();
         TCPServerSocket *serverSocket;
     
     private:
@@ -31,7 +31,7 @@ class ASM {
         int port;
         ASMToggles *toggles;
 
-        void handleEvent(string event, int data, ASMToggles *toggles);
+        void handleEvent(string event, int data, ThreadContext *ctx);
         void listenForConnections();
 
         void reportAltitude(ThreadContext*);

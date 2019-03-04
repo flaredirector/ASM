@@ -8,12 +8,10 @@
  */
 
 #include "ASM.hpp"
+#include "Events.hpp"
 #include <iostream>           // For cout, cerr
-#include <cstdlib>            // For atoi()  
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
-#include <signal.h>           // For sigignore()
-#include "Events.hpp"
 
 using namespace std;
 
@@ -41,7 +39,7 @@ ASM::ASM(unsigned short int port) {
  ** Initializes new TCP server, starts the altitude data
  ** acquisition thread, and begins listening for new connections.
  */
-void ASM::start(void) {
+void ASM::start() {
     cout << "Starting ASM..." << endl;
 
     try {
@@ -112,14 +110,14 @@ void ASM::listenForConnections() {
  * @param {event} The event received from the client
  * @param {data} The data passed with the event
  */
-void ASM::handleEvent(string event, int data, ASMToggles *toggles) {
+void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     string debugMessage;
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         debugMessage = CALIBRATION_EVENT;
     } else if (event == REPORTING_TOGGLE_EVENT) {
         debugMessage = REPORTING_TOGGLE_EVENT;
-        toggles->reportingToggle = data ? true : false;
+        ctx->toggles->reportingToggle = data ? true : false;
     } else {
         debugMessage = "OTHER";
     }
@@ -139,18 +137,18 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
         int recvMsgSize;
         while ((recvMsgSize = ctx->clientSocket->recv(buffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
             // Convert into string for easier use
-            string receivedMessage = buffer; 
+            string bufferString = buffer; 
 
-            cout << "RECEIVED MESSAGE: " << receivedMessage << endl;
+            cout << "RECEIVED MESSAGE: " << bufferString << endl;
             
             // Decode message string into message object
-            Message *message = new Message(receivedMessage);
+            Message *message = new Message(bufferString);
 
             // Loop through the parsed events in the decoded message and determine what to do
             // for each event.
             for (int i = 0; i < message->events.size(); i++) {
                 Event parsedEvent = message->events[i];
-                this->handleEvent(parsedEvent.event, parsedEvent.data, ctx->toggles);
+                this->handleEvent(parsedEvent.event, parsedEvent.data, ctx);
             }
         }
     } catch (SocketException &e) {
@@ -196,7 +194,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Output debug data
             // cout << "Sent: " << message->message << endl;
         }
-
+        
         // 100 milliseconds (10 Hz)
         usleep(100000); 
     }
