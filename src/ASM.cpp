@@ -28,7 +28,7 @@ ASM::ASM(unsigned short int port) {
 
     // Setup toggles
     this->toggles = (ASMToggles *) malloc(sizeof(ASMToggles));
-    this->toggles->reportingToggle = true;
+    this->toggles->reportingToggle = false;
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
@@ -188,8 +188,8 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 return;
             }
 
-	   // Output debug data
-	   cout << "Sent: " << message->message << endl;
+	        // Output debug data
+	        cout << "Sent: " << message->message << endl;
 
             // Free up message memory to prevent memory leak
             delete message;
