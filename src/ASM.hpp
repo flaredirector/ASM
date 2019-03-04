@@ -27,7 +27,6 @@ class ASM {
         TCPServerSocket *serverSocket;
     
     private:
-        LIDARInterface *lidar;
         AltitudeProvider *altitudeProvider;
         int port;
 

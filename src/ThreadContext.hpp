@@ -19,10 +19,7 @@
  */
 class ThreadContext {
     public:
-    LIDARInterface *lidar;
     TCPSocket *clientSocket;
     AltitudeProvider *altitudeProvider;
-    ThreadContext(TCPSocket *cs, LIDARInterface *l);
-    ThreadContext(TCPSocket *cs);
     ThreadContext(TCPSocket *cs, AltitudeProvider *ap);
 };
