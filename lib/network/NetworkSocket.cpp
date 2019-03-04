@@ -205,7 +205,9 @@ void CommunicatingSocket::send(const void *buffer, int bufferLen)
 
 void CommunicatingSocket::send(Message *message)
     throw(SocketException) {
-    this->send(message->message.c_str(), message->message.size());
+    char messageBuffer[64];
+    sprintf(messageBuffer, "%s\4", message->message.c_str());
+    this->send(messageBuffer, strlen(messageBuffer));
 }
 
 int CommunicatingSocket::recv(void *buffer, int bufferLen) 

@@ -89,6 +89,6 @@ void Message::encode() {
         if (i != this->events.size()-1)
             packet += "|";
     }
-    packet[packet.size()] = '\4';
+    //packet[packet.size()] = '\4';
     this->message = packet;
 }
