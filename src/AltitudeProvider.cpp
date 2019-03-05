@@ -25,6 +25,9 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     #ifndef DEBUG
     this->lidar = new LIDARInterface();
     this->sonar = new SONARInterface();
+
+    this->dataFile.open("data.csv");
+    this->dataFile << "LIDAR,SONAR" << endl;
     
     // Attempt connection to the LIDAR interface
     int lidarError = this->lidar->connect();
@@ -52,6 +55,9 @@ void AltitudeProvider::acquireDataLoop() {
     while (this->lidar->err >= 0 && this->sonar->err >= 0) {
         this->sonarDistance = this->sonar->getDistance();
         this->lidarDistance = this->lidar->getDistance();
+
+	if (this->toggles->dataLoggingToggle)
+		this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
         // TODO: Perform sensor weighting and signal processing
         this->altitude = this->lidarDistance;

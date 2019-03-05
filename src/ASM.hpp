@@ -25,9 +25,8 @@ class ASM {
         ~ASM();
         void start();
         TCPServerSocket *serverSocket;
-    
+ 	AltitudeProvider *altitudeProvider;   
     private:
-        AltitudeProvider *altitudeProvider;
         int port;
         ASMToggles *toggles;
 

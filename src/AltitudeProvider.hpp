@@ -10,6 +10,7 @@
 #include "../lib/sensor/lidar/LIDARInterface.hpp"
 #include "../lib/sensor/sonar/SONARInterface.hpp"
 #include "ASMToggles.hpp"
+#include <fstream>
 
 class AltitudeProvider {
     public:
@@ -18,6 +19,7 @@ class AltitudeProvider {
         int getAltitude();
         int lidarDistance;
         int sonarDistance;
+	std::ofstream dataFile;
     private:
         ASMToggles *toggles;
         LIDARInterface *lidar;

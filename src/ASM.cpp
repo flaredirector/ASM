@@ -29,6 +29,7 @@ ASM::ASM(unsigned short int port) {
     // Setup toggles
     this->toggles = (ASMToggles *) malloc(sizeof(ASMToggles));
     this->toggles->reportingToggle = false;
+    this->toggles->dataLoggingToggle = false;
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);

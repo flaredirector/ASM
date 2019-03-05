@@ -24,6 +24,7 @@ ASM *sensorModule;
  */
 void quitHandler(int sig_num) {
   cout << endl << "Exiting Sensor Module program..." << endl;
+  sensorModule->altitudeProvider->dataFile.close();
   delete sensorModule->serverSocket;
   exit(0);
 }
