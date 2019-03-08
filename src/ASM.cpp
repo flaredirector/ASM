@@ -12,7 +12,7 @@
 #include <iostream>           // For cout, cerr
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
-#include <stdio.h>
+
 using namespace std;
 
 /**
@@ -30,6 +30,7 @@ ASM::ASM(unsigned short int port) {
     this->toggles = (ASMToggles *) malloc(sizeof(ASMToggles));
     this->toggles->reportingToggle = false;
     this->toggles->dataLoggingToggle = false;
+    this->toggles->hasBeenCalibrated = false;
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
@@ -172,8 +173,8 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             Message *message = new Message(ALTITUDE_EVENT, altitude);
 
             #ifdef DEBUG
-            //message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
-            //message->addEvent(SONAR_DATA_EVENT, altitude + 4);
+            message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
+            message->addEvent(SONAR_DATA_EVENT, altitude + 4);
             #else
             message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
             message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
@@ -190,7 +191,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             }
 
 	        // Output debug data
-	        cout << "Sent: " << message->message << endl;
+	        // cout << "Sent: " << message->message << endl;
 
             // Free up message memory to prevent memory leak
             delete message;

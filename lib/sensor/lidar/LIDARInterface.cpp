@@ -8,9 +8,22 @@
  * and I2C details for acquiring the LIDAR sensor data.
  */
 
-#include "LIDARInterface.hpp"
-
 #ifndef DEBUG
+#include "LIDARInterface.hpp"
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <cstdlib>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+#define LIDAR_LITE_ADDRESS = 0x62
+#define LIDAR_LITE_DIST_WRITE_REG = 0x00
+#define LIDAR_LITE_DIST_WRITE_VAL = 0x04
+#define LIDAR_LITE_DIST_READ_REG = 0x8f
+#define LIDAR_LITE_DIST_READ_REG_2 = 0x98
+
 using namespace std;
 
 /**
@@ -112,13 +125,5 @@ int LIDARInterface::getDistance( void ){
     buf[1] = res;
   }
   return (buf[0] << 8) + buf[1];
-}
-
-/**
- * getError
- ** Returns the current error code of the LIDAR.
- */
-int LIDARInterface::getError(void){
-  return err;
 }
 #endif

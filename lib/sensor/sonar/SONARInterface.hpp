@@ -7,13 +7,11 @@
  * for the SONARInterface class.
  */
 
-class SONARInterface {
+class SONARInterface: public SensorInterface {
     int uartFilestream;
     char rx_buffer[256];
 
     public:
         SONARInterface();
-        int err;
-        int getDistance();
         int setup();
 };

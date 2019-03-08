@@ -7,6 +7,7 @@
  * for the AltitudeProvider class.
  */
 
+#include "../lib/sensor/SensorInterface.hpp"
 #include "../lib/sensor/lidar/LIDARInterface.hpp"
 #include "../lib/sensor/sonar/SONARInterface.hpp"
 #include "ASMToggles.hpp"
@@ -19,7 +20,7 @@ class AltitudeProvider {
         int getAltitude();
         int lidarDistance;
         int sonarDistance;
-	std::ofstream dataFile;
+	    std::ofstream dataFile;
     private:
         ASMToggles *toggles;
         LIDARInterface *lidar;

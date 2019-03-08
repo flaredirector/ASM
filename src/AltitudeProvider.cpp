@@ -13,6 +13,10 @@
 #include <unistd.h>  // for usleep
 #include <iostream>
 
+#define LIDAR_FACTOR 0.8
+#define SONAR_FACTOR 0.2
+#define DATA_LOGGING_FILENAME "data.csv"
+
 using namespace std;
 
 /**
@@ -26,7 +30,7 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->lidar = new LIDARInterface();
     this->sonar = new SONARInterface();
 
-    this->dataFile.open("data.csv");
+    this->dataFile.open(DATA_LOGGING_FILENAME);
     this->dataFile << "LIDAR,SONAR" << endl;
     
     // Attempt connection to the LIDAR interface
@@ -60,7 +64,9 @@ void AltitudeProvider::acquireDataLoop() {
 		this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
         // TODO: Perform sensor weighting and signal processing
-        this->altitude = this->lidarDistance;
+        int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
+
+        this->altitude = processedAltitude;
     #else
     for (;;) {
         this->altitude--;
