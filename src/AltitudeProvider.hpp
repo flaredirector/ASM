@@ -18,6 +18,7 @@ class AltitudeProvider {
         AltitudeProvider(ASMToggles *asmToggles);
         void acquireDataLoop();
         int getAltitude();
+        int calibrate();
         int lidarDistance;
         int sonarDistance;
 	    std::ofstream dataFile;
@@ -26,4 +27,6 @@ class AltitudeProvider {
         LIDARInterface *lidar;
         SONARInterface *sonar;
         int altitude;
+        int lidarOffset;
+        int sonarOffset;
 };

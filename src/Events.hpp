@@ -14,5 +14,6 @@
 #define SENSOR_FAILURE_EVENT "sensorFailure"
 #define HARDWARE_FAILURE_EVENT "hardwareFailure"
 #define CALIBRATION_FAILURE_EVENT "calibrationFailure"
+#define CALIBRATION_SUCCESSFUL_EVENT "calibrationSuccessful"
 #define LIDAR_DATA_EVENT "lidarData"
 #define SONAR_DATA_EVENT "sonarData"

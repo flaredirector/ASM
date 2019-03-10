@@ -59,11 +59,16 @@ void AltitudeProvider::acquireDataLoop() {
     #ifndef DEBUG
     // Acquire data while both sensors are operational
     while (this->lidar->err >= 0 && this->sonar->err >= 0) {
-        this->sonarDistance = this->sonar->getDistance();
-        this->lidarDistance = this->lidar->getDistance();
+        // Adjust sensor distances for calibration offsets
+        int adjustedSonarDistance = this->sonar->getDistance() - this->sonarOffset;
+        int adjustedLidarDistance = this->lidar->getDistance() - this->lidarOffset;
 
-	if (this->toggles->dataLoggingToggle)
-		this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
+        // If adjusted sensor distance is less than 0, just set to 0
+        this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
+        this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
+
+        if (this->toggles->dataLoggingToggle)
+            this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
         // TODO: Perform sensor weighting and signal processing
         int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
@@ -83,8 +88,50 @@ void AltitudeProvider::acquireDataLoop() {
 }
 
 /**
+ * acquireDataLoop
+ ** Runs the loop that acquires sensor data and processes
+ ** the data.
+ * @return (int) The return code of the calibration operation
+ */
+int AltitudeProvider::calibrate() {
+    cout << "Calibrating..." << endl;
+
+    #ifndef DEBUG
+    this->toggles->reportingToggle = true;
+    int lidarSampleTotal = 0;
+    int sonarSampleTotal = 0;
+
+    // Get 20 samples of data
+    for (int sample = 0; sample < 20; sample++) {
+        lidarSampleTotal += this->lidarDistance;
+        sonarSampleTotal += this->sonarDistance;
+        usleep(100 MILLISECONDS);
+    }
+
+    // Get average of samples
+    lidarSampleTotal /= 20;
+    sonarSampleTotal /= 20;
+
+    // Set offset values
+    this->lidarOffset = lidarSampleTotal;
+    this->sonarOffset = sonarSampleTotal;
+
+    // Check offset values and return error if something looks wrong
+
+    this->toggles->reportingToggle = false;
+    #else
+    usleep(2000 MILLISECONDS); // 2 seconds
+    #endif
+
+    cout << "Done Calibrating" << endl;
+    this->toggles->hasBeenCalibrated = true;
+    return 0;
+}
+
+/**
  * getAltitude
  ** Returns the acquired and processed altitude.
+ * @return (int) The processed altitude
  */
 int AltitudeProvider::getAltitude() {
     return this->altitude;

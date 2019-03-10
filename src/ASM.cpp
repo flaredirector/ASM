@@ -116,19 +116,28 @@ void ASM::listenForConnections() {
  * @param {ctx} The current ThreadContext 
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
-    string debugMessage;
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
-        debugMessage = CALIBRATION_EVENT;
-        ctx->altitudeProvider->calibrate();
+        cout << "Starting calibration..." << endl;
+        string reply;
+
+        int e = ctx->altitudeProvider->calibrate();
+
+        // If calibration error
+        if (e != 0)
+            reply = CALIBRATION_FAILURE_EVENT;
+        else 
+            reply = CALIBRATION_SUCCESSFUL_EVENT;
+
+        Message *calibrationReply = new Message(reply, e);
+
+        ctx->clientSocket->send
     } else if (event == REPORTING_TOGGLE_EVENT) {
-        debugMessage = REPORTING_TOGGLE_EVENT;
+        cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
     } else {
-        debugMessage = "OTHER";
+        cout << "RECEIVED: OTHER" << endl;
     }
-
-    cout << "EVENT: " + debugMessage << endl;
 }
 
 /**
