@@ -23,4 +23,5 @@ class ThreadContext {
     AltitudeProvider *altitudeProvider;
     ASMToggles *toggles;
     ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t);
+    bool socketIsAlive;
 };

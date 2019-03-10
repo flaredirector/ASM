@@ -20,4 +20,5 @@ ThreadContext::ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t)
     this->clientSocket = cs;
     this->altitudeProvider = ap;
     this->toggles = t;
+    this->socketIsAlive = true;
 }

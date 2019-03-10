@@ -13,6 +13,8 @@
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
 
+#define MILLISECONDS *1000
+
 using namespace std;
 
 /**
@@ -153,8 +155,14 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
                 this->handleEvent(parsedEvent.event, parsedEvent.data, ctx);
             }
         }
+
+        // Set ThreadContext socketIsAlive boolean to false to trigger the exit of the
+        // reportAltitude thread.
+        ctx->socketIsAlive = false;
     } catch (SocketException &e) {
         cout << e.what() << endl;
+        ctx->socketIsAlive = false;
+        return;
     }
 }
 
@@ -164,7 +172,10 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
  * @param {ctx} The ThreadTask passed during thread creation
  */
 void ASM::reportAltitude(ThreadContext *ctx) {
-    for (;;) {
+    // While the ThreadContext socketIsAlive toggle is set to true, run the loop.
+    // The loop will exit when socketIsAlive is set to false by the handleClientMessage
+    // thread when a client disconnects.
+    while (ctx->socketIsAlive) {
         if (ctx->toggles->reportingToggle) {
             // Get altitude data from provider
             int altitude = ctx->altitudeProvider->getAltitude();
@@ -196,9 +207,9 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Free up message memory to prevent memory leak
             delete message;
         }
-        
+
         // 100 milliseconds (10 Hz)
-        usleep(100000); 
+        usleep(100 MILLISECONDS); 
     }
 }
 
@@ -219,6 +230,7 @@ void *ASM::reportAltitudeCS(void *ctx) {
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
     // delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+    cout << "Exiting reportAltitude thread..." << endl;
     return NULL;
 }
 
@@ -239,6 +251,7 @@ void *ASM::handleClientMessageCS(void *ctx) {
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
     // delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+    cout << "Exiting handleClientMessage thread..." << endl;
     return NULL;
 }
 

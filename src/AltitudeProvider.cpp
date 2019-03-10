@@ -17,6 +17,8 @@
 #define SONAR_FACTOR 0.2
 #define DATA_LOGGING_FILENAME "data.csv"
 
+#define MILLISECONDS *1000
+
 using namespace std;
 
 /**
@@ -74,9 +76,9 @@ void AltitudeProvider::acquireDataLoop() {
             this->altitude = 120;
     #endif
         if (this->toggles->reportingToggle)
-            usleep(100000); // 10hz
+            usleep(100 MILLISECONDS); // 10hz
         else
-            usleep(1000000); // 1hz
+            usleep(1000 MILLISECONDS); // 1hz
     }
 }
 
