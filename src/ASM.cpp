@@ -157,7 +157,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
                 this->handleEvent(parsedEvent.event, parsedEvent.data, ctx);
             }
 
-            // Flsuh the input message buffer
+            // Flush the input message buffer
             memset(buffer, '\0', RCVBUFSIZE);
         }
 
