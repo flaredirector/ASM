@@ -84,7 +84,7 @@ void ASM::listenForConnections() {
             clientSocket = this->serverSocket->accept();
         } catch (SocketException &e) {
             cerr << e.what() << endl;
-            exit(1);
+            continue;
         }
 
         cout << "Client Connected" << endl;
@@ -113,12 +113,14 @@ void ASM::listenForConnections() {
  ** Determines what to execute based on the received event
  * @param {event} The event received from the client
  * @param {data} The data passed with the event
+ * @param {ctx} The current ThreadContext 
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     string debugMessage;
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         debugMessage = CALIBRATION_EVENT;
+        ctx->altitudeProvider->calibrate();
     } else if (event == REPORTING_TOGGLE_EVENT) {
         debugMessage = REPORTING_TOGGLE_EVENT;
         ctx->toggles->reportingToggle = data ? true : false;
@@ -144,7 +146,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             string bufferString = buffer; 
 
             cout << "RECEIVED MESSAGE: " << bufferString << endl;
-            
+
             // Decode message string into message object
             Message *message = new Message(bufferString);
 
@@ -154,6 +156,9 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
                 Event parsedEvent = message->events[i];
                 this->handleEvent(parsedEvent.event, parsedEvent.data, ctx);
             }
+
+            // Flsuh the input message buffer
+            memset(buffer, '\0', RCVBUFSIZE);
         }
 
         // Set ThreadContext socketIsAlive boolean to false to trigger the exit of the
@@ -176,7 +181,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     // The loop will exit when socketIsAlive is set to false by the handleClientMessage
     // thread when a client disconnects.
     while (ctx->socketIsAlive) {
-        if (ctx->toggles->reportingToggle) {
+        if (ctx->toggles->reportingToggle && ctx->toggles->hasBeenCalibrated) {
             // Get altitude data from provider
             int altitude = ctx->altitudeProvider->getAltitude();
             
@@ -227,9 +232,6 @@ void *ASM::reportAltitudeCS(void *ctx) {
     // Extract socket file descriptor from argument  
     this->reportAltitude(((ThreadContext *) ctx));
 
-    // First cast is to tell delete what type of instance it's deleting
-    // Second cast is to tell compilter that there is a clientSocket attribute on args
-    // delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
     cout << "Exiting reportAltitude thread..." << endl;
     return NULL;
 }
@@ -243,14 +245,18 @@ void *ASM::reportAltitudeCS(void *ctx) {
  */
 void *ASM::handleClientMessageCS(void *ctx) {
     // Guarantees that thread resources are deallocated upon return  
-    pthread_detach(pthread_self()); 
+    if (pthread_detach(pthread_self()) < 0) {
+        cout << "Unable to detach thread" << endl;
+        return NULL;
+    }
 
     // Extract socket file descriptor from argument  
     this->handleClientMessage(((ThreadContext *) ctx));
 
     // First cast is to tell delete what type of instance it's deleting
     // Second cast is to tell compilter that there is a clientSocket attribute on args
-    // delete (TCPSocket *) ((ThreadTask *) args)->clientSocket;
+    delete (TCPSocket *) ((ThreadContext *) ctx)->clientSocket;
+
     cout << "Exiting handleClientMessage thread..." << endl;
     return NULL;
 }
@@ -263,7 +269,10 @@ void *ASM::handleClientMessageCS(void *ctx) {
  */
 void *ASM::acquireAltitudeDataCS(void *ctx) {
     // Guarantees that thread resources are deallocated upon return 
-    pthread_detach(pthread_self());
+    if (pthread_detach(pthread_self()) < 0) {
+        cout << "Unable to detach thread" << endl;
+        return NULL;
+    }
 
     // Start the sensor data acquisition loop
     ((AltitudeProvider *) ctx)->acquireDataLoop();
