@@ -16,6 +16,9 @@
 #define LIDAR_FACTOR 0.8
 #define SONAR_FACTOR 0.2
 #define DATA_LOGGING_FILENAME "data.csv"
+#define MAX_OFFSET_FEET 6
+#define LIDAR_OUT_OF_RANGE_VALUE 0
+#define SONAR_OUT_OF_RANGE_VALUE 1068
 
 #define MILLISECONDS *1000
 
@@ -59,6 +62,17 @@ void AltitudeProvider::acquireDataLoop() {
     #ifndef DEBUG
     // Acquire data while both sensors are operational
     while (this->lidar->err >= 0 && this->sonar->err >= 0) {
+        // Log the raw sensor data
+        if (this->toggles->dataLoggingToggle)
+            this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
+
+        // Check if lidar is detecting ground and if sonar is at max range.
+        // If this is the case, aircraft is at upper boundary of lidar and out
+        // of range of sonar, which needs to be handled.
+        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
+            
+        }
+
         // Adjust sensor distances for calibration offsets
         int adjustedSonarDistance = this->sonar->getDistance() - this->sonarOffset;
         int adjustedLidarDistance = this->lidar->getDistance() - this->lidarOffset;
@@ -67,8 +81,7 @@ void AltitudeProvider::acquireDataLoop() {
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
         this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
 
-        if (this->toggles->dataLoggingToggle)
-            this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
+
 
         // TODO: Perform sensor weighting and signal processing
         int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
@@ -97,6 +110,7 @@ int AltitudeProvider::calibrate() {
     cout << "Calibrating..." << endl;
 
     #ifndef DEBUG
+    // Toggle reporting on to trigger high polling rate
     this->toggles->reportingToggle = true;
     int lidarSampleTotal = 0;
     int sonarSampleTotal = 0;
@@ -108,15 +122,17 @@ int AltitudeProvider::calibrate() {
         usleep(100 MILLISECONDS);
     }
 
-    // Get average of samples
-    lidarSampleTotal /= 20;
-    sonarSampleTotal /= 20;
-
-    // Set offset values
-    this->lidarOffset = lidarSampleTotal;
-    this->sonarOffset = sonarSampleTotal;
+    // Average samples and set offset values
+    this->lidarOffset = (lidarSampleTotal /= 20);
+    this->sonarOffset = (sonarSampleTotal /= 20);
 
     // Check offset values and return error if something looks wrong
+    int maximumAllowableOffset = (int)(MAX_OFFSET_FEET*12*2.54); // 6 feet, 183 centimeters
+    if (this->lidarOffset >= maximumAllowableOffset || 
+        this->sonarOffset >= maximumAllowableOffset) {
+            this->toggles->reportingToggle = false;
+            return -1;
+    }
 
     this->toggles->reportingToggle = false;
     #else

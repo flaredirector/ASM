@@ -119,19 +119,16 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         cout << "Starting calibration..." << endl;
-        string reply;
 
+        // Execute calibration
         int e = ctx->altitudeProvider->calibrate();
 
-        // If calibration error
-        if (e != 0)
-            reply = CALIBRATION_FAILURE_EVENT;
-        else 
-            reply = CALIBRATION_SUCCESSFUL_EVENT;
+        // Encode calibration reply message
+        Message *calibrationReply = new Message(CALIBRATION_STATUS_EVENT, e);
+        calibrationReply->encode();
 
-        Message *calibrationReply = new Message(reply, e);
-
-        ctx->clientSocket->send
+        // Send reply message
+        ctx->clientSocket->send(calibrationReply);
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
@@ -215,9 +212,6 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 return;
             }
 
-	        // Output debug data
-	        // cout << "Sent: " << message->message << endl;
-
             // Free up message memory to prevent memory leak
             delete message;
         }
@@ -236,7 +230,10 @@ void ASM::reportAltitude(ThreadContext *ctx) {
  */
 void *ASM::reportAltitudeCS(void *ctx) {
     // Guarantees that thread resources are deallocated upon return  
-    pthread_detach(pthread_self()); 
+    if (pthread_detach(pthread_self()) < 0) {
+        cout << "Unable to detach thread" << endl;
+        return NULL;
+    } 
 
     // Extract socket file descriptor from argument  
     this->reportAltitude(((ThreadContext *) ctx));
