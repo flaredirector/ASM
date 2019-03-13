@@ -8,8 +8,17 @@
 #include "../lib/network/NetworkSocket.hpp"  // For Socket and SocketException
 #include <iostream>           // For cerr and cout
 #include <stdlib.h>
+#include <unistd.h>
 
 using namespace std;
+
+void handleEvent(string event, int data) {
+	if (event == "calibrationSuccessful") {
+		cout << "Calibration Successful!" << endl;
+	} else if (event == "altitude") {
+		cout << "Altitude: " << data << endl;
+	}
+}
 
 int main(int argc, char *argv[]) {
 	if ((argc < 1) || (argc > 3)) {     // Test for correct number of arguments
@@ -24,9 +33,11 @@ int main(int argc, char *argv[]) {
 		// Establish connection with the echo server
 		TCPSocket *socket = new TCPSocket(serverAddress, echoServerPort);
 
-		char message[64];
-		stpcpy(message, "reportingToggle:1");
-		socket->send(message, strlen(message));
+		Message *msg = new Message("calibrate", 1);
+		msg->addEvent("reportingToggle", 1);
+		msg->encode();
+		socket->send(msg);
+		delete msg;
 
 		char buffer[BUFSIZE];
 		int recvMsgSize;
@@ -36,7 +47,13 @@ int main(int argc, char *argv[]) {
 
 			// Convert into string for easier use
 			string receivedMessage = buffer; 
-			cout << "Received: " << receivedMessage << endl;
+			
+			Message *parsedMessage = new Message(receivedMessage);
+			for (int i = 0; i < parsedMessage->events.size(); i++) {
+                Event parsedEvent = parsedMessage->events[i];
+                handleEvent(parsedEvent.event, parsedEvent.data);
+            }
+			delete parsedMessage;
 		}
 	} catch(SocketException &e) {
 		cerr << e.what() << endl;
