@@ -8,8 +8,10 @@
  * and I2C details for acquiring the LIDAR sensor data.
  */
 
-#ifndef DEBUG
+
 #include "LIDARInterface.hpp"
+
+#ifndef DEBUG
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <cstdlib>
@@ -26,6 +28,8 @@
 
 using namespace std;
 
+#endif
+
 /**
  * LIDARInterface
  ** Instantiates new LIDARInterface instance and
@@ -33,8 +37,10 @@ using namespace std;
  */
 LIDARInterface::LIDARInterface (void){
   err = 0;
+  #ifndef DEBUG
   adapter_num = 1;
   snprintf(filename, 19, "/dev/i2c-%d", adapter_num);
+  #endif
 }
 
 /**
@@ -42,10 +48,12 @@ LIDARInterface::LIDARInterface (void){
  ** Closes the I2C data bus on instance deletion.
  */
 LIDARInterface::~LIDARInterface( void ) {
+  #ifndef DEBUG
   printf("Ending Lidar-Lite Session\n");
   if (i2c_bus > 0){
    int e = close(i2c_bus);
   }
+  #endif
 }
 
 /**
@@ -54,18 +62,20 @@ LIDARInterface::~LIDARInterface( void ) {
  ** I2C bus.
  */
 int LIDARInterface::connect( void ){
+  #ifndef DEBUG
   printf("Connecting to Lidar: %s\n", filename);
   i2c_bus = open(filename, O_RDWR);
   if (i2c_bus < 0){
     err = errno;
     printf("Connect Error: %d\n", err);
-    return -1;
+    return 1;
   }
   if (ioctl(i2c_bus, I2C_SLAVE, 0x62) < 0) {
     err = errno;
     printf("Bus Error: %d\n", err);
-    return -1;
+    return 1;
   }
+  #endif
   return 0;
 }
 
@@ -74,15 +84,16 @@ int LIDARInterface::connect( void ){
  ** Writes data to the LIDAR.
  */
 int LIDARInterface::writeAndWait(int writeRegister, int value){
+  #ifndef DEBUG
   res = i2c_smbus_write_byte_data(i2c_bus, writeRegister, value);
   usleep(10000);
   if (res < 0){
     err = errno;
     printf("Write Error %d\n", err);
-    return -1;
-  } else {
-    return 0;
+    return 1;
   }
+  #endif
+  return 0;
 }
 
 /**
@@ -90,15 +101,16 @@ int LIDARInterface::writeAndWait(int writeRegister, int value){
  ** Reads data from the LIDAR.
  */
 int LIDARInterface::readAndWait(int readRegister){
+  #ifndef DEBUG
   res = i2c_smbus_read_byte_data(i2c_bus, readRegister);
   usleep(10000);
   if (res < 0){
     err = errno;
     printf("Read Error: %d\n", err);
-    return -1;
-  } else {
-    return 0;
+    return 1;
   }
+  #endif
+  return 0;
 }
 
 /**
@@ -106,6 +118,7 @@ int LIDARInterface::readAndWait(int readRegister){
  ** Gets the reported distance from the LIDAR.
  */
 int LIDARInterface::getDistance( void ){
+  #ifndef DEBUG
   int buf[2];
   int e = 0;
   e = writeAndWait(0x00,0x04);
@@ -125,5 +138,6 @@ int LIDARInterface::getDistance( void ){
     buf[1] = res;
   }
   return (buf[0] << 8) + buf[1];
+  #endif
+  return 0;
 }
-#endif

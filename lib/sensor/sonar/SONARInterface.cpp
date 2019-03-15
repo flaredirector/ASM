@@ -12,11 +12,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef DEBUG
 #include <fcntl.h>	 //Used for UART
 #include <termios.h> //Used for UART
-#include <string.h>
+#endif
 
 /**
  * SONARInterface
@@ -34,6 +35,7 @@ SONARInterface::SONARInterface() {
  ** configuration settings.
  */
 int SONARInterface::setup() {
+    #ifndef DEBUG
     // At bootup, pins 8 and 10 are already set to UART0_TXD, UART0_RXD (ie the alt0 function) respectively
     // int uart0_filestream = -1;
     this->uartFilestream = -1;
@@ -56,7 +58,7 @@ int SONARInterface::setup() {
     {
         //ERROR - CAN'T OPEN SERIAL PORT
         printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
-        return this->err = -2;
+        return this->err = 2;
     }
 
     // CONFIGURE THE UART
@@ -82,8 +84,10 @@ int SONARInterface::setup() {
 
     // ----- CHECK FOR ANY RX BYTES -----
     if (this->uartFilestream == -1) {
-        return this->err = -1;
+        return this->err = 1;
     }
+    #endif
+    return 0;
 }
 
 /**
@@ -91,15 +95,16 @@ int SONARInterface::setup() {
  ** Returns the sensed distance from the SONAR sensor.
  */
 int SONARInterface::getDistance() {
+    #ifndef DEBUG
     //Filestream, buffer to store in, number of bytes to read (max)
     int rx_length = read(this->uartFilestream, (void*)this->rx_buffer, 255);
 
     if (rx_length < 0) {
         // An error occured (will occur if there are no bytes)
-        this->err = -1;
+        this->err = 1;
     } else if (rx_length == 0) {
         // No data waiting
-        this->err = -2;
+        this->err = 2;
     } else {
         // Bytes received
         this->rx_buffer[rx_length] = '\0';
@@ -117,5 +122,7 @@ int SONARInterface::getDistance() {
             return sonarData;
         }
     }
+    #else
+    return 0;
+    #endif
 }
-#endif

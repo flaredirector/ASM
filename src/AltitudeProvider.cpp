@@ -31,10 +31,10 @@ using namespace std;
  */
 AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->toggles = asmToggles;
-    #ifndef DEBUG
+    
     this->lidar = new LIDARInterface();
     this->sonar = new SONARInterface();
-
+    #ifndef DEBUG
     this->dataFile.open(DATA_LOGGING_FILENAME);
     this->dataFile << "LIDAR,SONAR" << endl;
     
@@ -61,7 +61,7 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
 void AltitudeProvider::acquireDataLoop() {
     #ifndef DEBUG
     // Acquire data while both sensors are operational
-    while (this->lidar->err >= 0 && this->sonar->err >= 0) {
+    while (this->lidar->err == 0 || this->sonar->err == 0) {
         // Log the raw sensor data
         if (this->toggles->dataLoggingToggle)
             this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
@@ -137,6 +137,7 @@ int AltitudeProvider::calibrate() {
 
     this->toggles->reportingToggle = false;
     #else
+    // Simulate calibration processing
     usleep(2000 MILLISECONDS); // 2 seconds
     #endif
 

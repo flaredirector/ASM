@@ -126,23 +126,40 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
         // Encode calibration reply message
         Message *calibrationReply = new Message(CALIBRATION_STATUS_EVENT, e);
         calibrationReply->encode();
-
-        // Send reply message
         ctx->clientSocket->send(calibrationReply);
+
+        delete calibrationReply;
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
+
+        Message *statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+        statusReply->encode();
+        ctx->clientSocket->send(statusReply);
+
+        delete statusReply;
     } else if (event == GET_STATUS_EVENT) {
         cout << "Sending system status..." << endl;
-        // Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
-        // statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
-        // statusReply->encode();
-        // cout << ctx->altitudeProvider->lidar->err << endl;
-        cout << "done encoding" << endl;
-        // ctx->clientSocket->send(statusReply);
 
+        Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+        statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+        statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+        statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+        statusReply->encode();
+        ctx->clientSocket->send(statusReply);
+
+        delete statusReply;
+    } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
+        cout << "Toggling data logging..." << endl;
+        ctx->toggles->dataLoggingToggle = data ? true : false;
+
+        Message *statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+        statusReply->encode();
+        ctx->clientSocket->send(statusReply);
+
+        delete statusReply;
     } else {
-        cout << "RECEIVED: OTHER" << endl;
+        cout << "Parsed unrecognized event" << endl;
     }
 }
 
@@ -172,6 +189,8 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
                 this->handleEvent(parsedEvent.event, parsedEvent.data, ctx);
             }
 
+            delete message;
+
             // Flush the input message buffer
             memset(buffer, '\0', RCVBUFSIZE);
         }
@@ -195,6 +214,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     // While the ThreadContext socketIsAlive toggle is set to true, run the loop.
     // The loop will exit when socketIsAlive is set to false by the handleClientMessage
     // thread when a client disconnects.
+    bool hasSentLidarFailure = false, hasSentSonarFailure = false;
     while (ctx->socketIsAlive) {
         if (ctx->toggles->reportingToggle && ctx->toggles->hasBeenCalibrated) {
             // Get altitude data from provider
@@ -203,6 +223,15 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, altitude);
 
+            if (ctx->altitudeProvider->lidar->err > 0 && !hasSentLidarFailure) {
+                message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+                hasSentLidarFailure = true;
+            }
+            if (ctx->altitudeProvider->sonar->err > 0 && !hasSentSonarFailure) {
+                message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+                hasSentSonarFailure = true;
+            }
+                
             #ifdef DEBUG
             message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
             message->addEvent(SONAR_DATA_EVENT, altitude + 4);

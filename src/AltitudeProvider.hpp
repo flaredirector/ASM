@@ -21,10 +21,10 @@ class AltitudeProvider {
         int lidarDistance;
         int sonarDistance;
 	    std::ofstream dataFile;
-    private:
-        ASMToggles *toggles;
         LIDARInterface *lidar;
         SONARInterface *sonar;
+    private:
+        ASMToggles *toggles;
         int altitude;
         int lidarOffset;
         int sonarOffset;

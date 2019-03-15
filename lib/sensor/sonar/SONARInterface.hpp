@@ -10,8 +10,8 @@
 class SONARInterface {
         int uartFilestream;
         char rx_buffer[256];
-        int err;
     public:
+        int err;
         SONARInterface();
         int setup();
         int getDistance();

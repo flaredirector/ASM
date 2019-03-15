@@ -16,8 +16,9 @@ class LIDARInterface {
     int adapter_num;
     char filename[20];
     int res;
-    int err;
+    
   public:
+    int err;
     LIDARInterface(void);
     ~LIDARInterface(void);
     int connect(void);
