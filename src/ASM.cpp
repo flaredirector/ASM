@@ -132,6 +132,15 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
+    } else if (event == GET_STATUS_EVENT) {
+        cout << "Sending system status..." << endl;
+        // Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+        // statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+        // statusReply->encode();
+        // cout << ctx->altitudeProvider->lidar->err << endl;
+        cout << "done encoding" << endl;
+        // ctx->clientSocket->send(statusReply);
+
     } else {
         cout << "RECEIVED: OTHER" << endl;
     }

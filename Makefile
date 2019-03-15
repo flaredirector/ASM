@@ -31,7 +31,7 @@ main: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(SONAR) $(LIBS) -lpthread
 
 debug: $(SRC) $(NETWORK) $(LIDAR)
-	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(LIBS) -lpthread -DDEBUG -ggdb -O0
+	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(LIDAR) $(SONAR) $(NETWORK) $(SRC) $(LIBS) -lpthread -DDEBUG -ggdb -O0
 
 clean:
 	$(RM) -rf bin/client.dSYM && $(RM) -f bin/*

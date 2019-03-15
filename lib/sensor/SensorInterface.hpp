@@ -10,5 +10,5 @@
 class SensorInterface {
     public:
         int err;
-        virtual int getDistance(void);
+        virtual int getDistance(void) = 0;
 };

@@ -69,7 +69,8 @@ void AltitudeProvider::acquireDataLoop() {
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
         // of range of sonar, which needs to be handled.
-        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
+        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) 
+        {
             
         }
 

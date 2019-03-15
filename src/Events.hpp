@@ -17,3 +17,4 @@
 #define CALIBRATION_STATUS_EVENT "calibrationStatus"
 #define LIDAR_DATA_EVENT "lidarData"
 #define SONAR_DATA_EVENT "sonarData"
+#define GET_STATUS_EVENT "getStatus"

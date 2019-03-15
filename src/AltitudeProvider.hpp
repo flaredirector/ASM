@@ -7,7 +7,6 @@
  * for the AltitudeProvider class.
  */
 
-#include "../lib/sensor/SensorInterface.hpp"
 #include "../lib/sensor/lidar/LIDARInterface.hpp"
 #include "../lib/sensor/sonar/SONARInterface.hpp"
 #include "ASMToggles.hpp"

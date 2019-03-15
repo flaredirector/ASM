@@ -12,7 +12,7 @@
 
 /**
  * @class ThreadContext
- * The ThreadTask class contains the necessary properties
+ * The ThreadContext class contains the necessary properties
  * to pass to pthread_create so that the thread can access
  * important class instances such as the sensors and newly
  * created TCP socket.
