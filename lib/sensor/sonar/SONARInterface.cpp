@@ -58,7 +58,7 @@ int SONARInterface::setup() {
     {
         //ERROR - CAN'T OPEN SERIAL PORT
         printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
-        return this->err = 2;
+        return this->err = -2;
     }
 
     // CONFIGURE THE UART
@@ -84,7 +84,7 @@ int SONARInterface::setup() {
 
     // ----- CHECK FOR ANY RX BYTES -----
     if (this->uartFilestream == -1) {
-        return this->err = 1;
+        return this->err = -1;
     }
     #endif
     return 0;
@@ -101,10 +101,10 @@ int SONARInterface::getDistance() {
 
     if (rx_length < 0) {
         // An error occured (will occur if there are no bytes)
-        this->err = 1;
+        this->err = -1;
     } else if (rx_length == 0) {
         // No data waiting
-        this->err = 2;
+        this->err = -2;
     } else {
         // Bytes received
         this->rx_buffer[rx_length] = '\0';

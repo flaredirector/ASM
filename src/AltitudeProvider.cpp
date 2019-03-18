@@ -39,13 +39,14 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->dataFile << "LIDAR,SONAR" << endl;
     
     // Attempt connection to the LIDAR interface
-    int lidarError = this->lidar->connect();
-    int sonarError = this->sonar->setup();
+    this->lidar->connect();
+    this->sonar->setup();
+
     // Check for error in connecting to the LIDAR interface
-    if (lidarError < 0) {
+    if (this->lidar->err < 0) {
         cout << "LIDAR ERROR: " << this->lidar->err << endl;
     }
-    if (sonarError < 0) {
+    if (this->sonar->err < 0) {
         cout << "SONAR ERROR: " << this->sonar->err << endl;
     }
     #else
@@ -81,8 +82,6 @@ void AltitudeProvider::acquireDataLoop() {
         // If adjusted sensor distance is less than 0, just set to 0
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
         this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
-
-
 
         // TODO: Perform sensor weighting and signal processing
         int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
