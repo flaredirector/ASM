@@ -116,50 +116,54 @@ void ASM::listenForConnections() {
  * @param {ctx} The current ThreadContext 
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
-    // Decide what to do based on received event
-    if (event == CALIBRATION_EVENT) {
-        cout << "Starting calibration..." << endl;
+    try {
+        // Decide what to do based on received event
+        if (event == CALIBRATION_EVENT) {
+            cout << "Starting calibration..." << endl;
 
-        // Execute calibration
-        int e = ctx->altitudeProvider->calibrate();
+            // Execute calibration
+            int e = ctx->altitudeProvider->calibrate();
 
-        // Encode calibration reply message
-        Message *calibrationReply = new Message(CALIBRATION_STATUS_EVENT, e);
-        calibrationReply->encode();
-        ctx->clientSocket->send(calibrationReply);
+            // Encode calibration reply message
+            Message *calibrationReply = new Message(CALIBRATION_STATUS_EVENT, e);
+            calibrationReply->encode();
+            ctx->clientSocket->send(calibrationReply);
 
-        delete calibrationReply;
-    } else if (event == REPORTING_TOGGLE_EVENT) {
-        cout << "Toggling reporting..." << endl;
-        ctx->toggles->reportingToggle = data ? true : false;
+            delete calibrationReply;
+        } else if (event == REPORTING_TOGGLE_EVENT) {
+            cout << "Toggling reporting..." << endl;
+            ctx->toggles->reportingToggle = data ? true : false;
 
-        Message *statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
-        statusReply->encode();
-        ctx->clientSocket->send(statusReply);
+            Message *statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+            statusReply->encode();
+            ctx->clientSocket->send(statusReply);
 
-        delete statusReply;
-    } else if (event == GET_STATUS_EVENT) {
-        cout << "Sending system status..." << endl;
+            delete statusReply;
+        } else if (event == GET_STATUS_EVENT) {
+            cout << "Sending system status..." << endl;
 
-        Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
-        statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
-        statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
-        statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
-        statusReply->encode();
-        ctx->clientSocket->send(statusReply);
+            Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+            statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+            statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+            statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+            statusReply->encode();
+            ctx->clientSocket->send(statusReply);
 
-        delete statusReply;
-    } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
-        cout << "Toggling data logging..." << endl;
-        ctx->toggles->dataLoggingToggle = data ? true : false;
+            delete statusReply;
+        } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
+            cout << "Toggling data logging..." << endl;
+            ctx->toggles->dataLoggingToggle = data ? true : false;
 
-        Message *statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
-        statusReply->encode();
-        ctx->clientSocket->send(statusReply);
+            Message *statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+            statusReply->encode();
+            ctx->clientSocket->send(statusReply);
 
-        delete statusReply;
-    } else {
-        cout << "Parsed unrecognized event" << endl;
+            delete statusReply;
+        } else {
+            cout << "Parsed unrecognized event" << endl;
+        }
+    } catch (SocketException &e) {
+        cout << e.what() << " in handleEvent()" << endl;
     }
 }
 
