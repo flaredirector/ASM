@@ -120,8 +120,6 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
         // Decide what to do based on received event
         if (event == CALIBRATION_EVENT) {
             cout << "Starting calibration..." << endl;
-
-            // Execute calibration
             int e = ctx->altitudeProvider->calibrate();
 
             // Encode calibration reply message
