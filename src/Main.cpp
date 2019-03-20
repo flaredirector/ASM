@@ -13,6 +13,11 @@
 
 using namespace std;
 
+/*
+ * Global instance needed for ASM instance in order to
+ * properly quit the program and deallocate sockets in the
+ * event of a Ctrl+C event.
+ */
 ASM *sensorModule;
 
 /**
@@ -44,7 +49,7 @@ int main(int argc, char *argv[]) {
       	sensorModule = new ASM(serverPort);
 
         //! Allows program to continue executing if the program receives
-        //! a broken pipe signal. 
+        //! a broken pipe signal. DO NOT REMOVE 
         sigignore(SIGPIPE);
 
         // Handle Ctrl+C event
