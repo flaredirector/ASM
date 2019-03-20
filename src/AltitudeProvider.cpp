@@ -111,6 +111,9 @@ int AltitudeProvider::calibrate() {
     cout << "Calibrating..." << endl;
 
     #ifndef DEBUG
+    this->toggles->hasBeenCalibrated = false;
+    // Reset offsets prior to new calibration
+    this->lidarOffset = 0; this->sonarOffset = 0;
     // Get current state of reportingToggle
     bool reportingWasOn = this->toggles->reportingToggle;
     // Toggle reporting on to trigger high polling rate
@@ -134,6 +137,8 @@ int AltitudeProvider::calibrate() {
     if (this->lidarOffset >= maximumAllowableOffset || 
         this->sonarOffset >= maximumAllowableOffset) {
             this->toggles->reportingToggle = false;
+            cout << "Calibration Error: Maxium allowable offset exceded." << endl;
+            cout << "LIDAR Offset: " << this->lidarOffset << ", SONAR Offset: " << this->sonarOffset << endl;
             return -1;
     }
     // If the reportingToggle was not on prior to calibration, turn it back off

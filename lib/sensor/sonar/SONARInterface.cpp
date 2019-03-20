@@ -98,7 +98,7 @@ int SONARInterface::getDistance() {
     #ifndef DEBUG
     //Filestream, buffer to store in, number of bytes to read (max)
     int rx_length = read(this->uartFilestream, (void*)this->rx_buffer, 255);
-
+    // printf("rx_length: %d\n", rx_length);
     if (rx_length < 0) {
         // An error occured (will occur if there are no bytes)
         this->err = -1;
@@ -121,8 +121,12 @@ int SONARInterface::getDistance() {
 
             return sonarData;
         }
+
+        // If the second character is empty, most likely not able to get data from sensor so set error
+        if (this->rx_buffer[1] == '\0') {
+            this->err = -3;
+        }
     }
-    #else
-    return 0;
     #endif
+    return 0;
 }
