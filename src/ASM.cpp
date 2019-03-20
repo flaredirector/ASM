@@ -225,11 +225,11 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, altitude);
 
-            if (ctx->altitudeProvider->lidar->err > 0 && !hasSentLidarFailure) {
+            if (ctx->altitudeProvider->lidar->err < 0 && !hasSentLidarFailure) {
                 message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
                 hasSentLidarFailure = true;
             }
-            if (ctx->altitudeProvider->sonar->err > 0 && !hasSentSonarFailure) {
+            if (ctx->altitudeProvider->sonar->err < 0 && !hasSentSonarFailure) {
                 message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
                 hasSentSonarFailure = true;
             }

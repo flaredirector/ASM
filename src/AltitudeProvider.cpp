@@ -111,6 +111,8 @@ int AltitudeProvider::calibrate() {
     cout << "Calibrating..." << endl;
 
     #ifndef DEBUG
+    // Get current state of reportingToggle
+    bool reportingWasOn = this->toggles->reportingToggle;
     // Toggle reporting on to trigger high polling rate
     this->toggles->reportingToggle = true;
     int lidarSampleTotal = 0;
@@ -134,14 +136,16 @@ int AltitudeProvider::calibrate() {
             this->toggles->reportingToggle = false;
             return -1;
     }
-
-    this->toggles->reportingToggle = false;
+    // If the reportingToggle was not on prior to calibration, turn it back off
+    if (!reportingWasOn)
+        this->toggles->reportingToggle = false;
     #else
     // Simulate calibration processing
     usleep(2000 MILLISECONDS); // 2 seconds
     #endif
 
     cout << "Done Calibrating" << endl;
+    cout << "LIDAR Offset: " << this->lidarOffset << ", SONAR Offset: " << this->sonarOffset << endl;
     this->toggles->hasBeenCalibrated = true;
     return 0;
 }
