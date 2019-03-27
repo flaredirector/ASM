@@ -10,8 +10,8 @@
  */
 
 #include "AltitudeProvider.hpp"
+#include "FixedQueue.hpp"
 #include <unistd.h>  // for usleep
-#include <iostream>
 
 #define LIDAR_FACTOR 0.8
 #define SONAR_FACTOR 0.2
@@ -61,12 +61,18 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
  ** the data.
  */
 void AltitudeProvider::acquireDataLoop() {
+    FixedQueue *lidarBuffer = new FixedQueue(5);
+    FixedQueue *sonarBuffer = new FixedQueue(5);
     #ifndef DEBUG
     // Acquire data while both sensors are operational
     while (this->lidar->err == 0 || this->sonar->err == 0) {
         // Log the raw sensor data
         if (this->toggles->dataLoggingToggle)
             this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
+
+        // Push data into FIFO buffer
+        lidarBuffer->push(this->lidar->getDistance());
+        sonarBuffer->push(this->sonar->getDistance());
 
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
@@ -77,8 +83,8 @@ void AltitudeProvider::acquireDataLoop() {
         }
 
         // Adjust sensor distances for calibration offsets
-        int adjustedSonarDistance = this->sonar->getDistance() - this->sonarOffset;
-        int adjustedLidarDistance = this->lidar->getDistance() - this->lidarOffset;
+        int adjustedSonarDistance = lidarBuffer->average() - this->sonarOffset;
+        int adjustedLidarDistance = sonarBuffer->average() - this->lidarOffset;
 
         // If adjusted sensor distance is less than 0, just set to 0
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
