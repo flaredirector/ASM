@@ -41,6 +41,8 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
 
     this->lidarDistance = 0;
     this->sonarDistance = 0;
+    this->lidarOffset = 0;
+    this->sonarOffset = 0;
     
     // Attempt connection to the LIDAR interface
     this->lidar->connect();
@@ -74,21 +76,20 @@ void AltitudeProvider::acquireDataLoop() {
         if (this->toggles->dataLoggingToggle)
             this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
-        // // Push data into FIFO buffer
-        if (this->lidar->err == 0) {
-            lidarBuffer->push(this->lidar->getDistance());
+        // Get sensor data
+        int rawLidarDistance = 0, rawSonarDistance = 1068; 
+        if (this->lidar->err == 0)
+            rawLidarDistance = this->lidar->getDistance();
+        if (this->sonar->err == 0)
+            rawSonarDistance = this->sonar->getDistance();
+
+        // Push data into FIFO buffer
+        if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE) {
+            lidarBuffer->push(rawLidarDistance);
         }
             
-        if (this->sonar->err == 0) {
-            sonarBuffer->push(this->sonar->getDistance());
-        }
-            
-        // Check if lidar is detecting ground and if sonar is at max range.
-        // If this is the case, aircraft is at upper boundary of lidar and out
-        // of range of sonar, which needs to be handled.
-        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) 
-        {
-            
+        if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE) {
+            sonarBuffer->push(rawSonarDistance);
         }
 
         // Adjust sensor distances for calibration offsets
@@ -98,11 +99,19 @@ void AltitudeProvider::acquireDataLoop() {
         // If adjusted sensor distance is less than 0, just set to 0
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
         this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
-
+            
         // TODO: Perform sensor weighting and signal processing
-        int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
 
-        this->altitude = 0;
+        // Check if lidar is detecting ground and if sonar is at max range.
+        // If this is the case, aircraft is at upper boundary of lidar and out
+        // of range of sonar, which needs to be handled.
+        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) 
+        {
+            this->altitude = this->lidarDistance;
+        } else {
+            this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
+        }
+        
     #else
     for (;;) {
         this->altitude--;
@@ -126,6 +135,9 @@ int AltitudeProvider::calibrate() {
     cout << "Calibrating..." << endl;
 
     #ifndef DEBUG
+    if (this->lidar->err != 0 || this->sonar->err != 0)
+        return -2;
+
     this->toggles->hasBeenCalibrated = false;
     // Reset offsets prior to new calibration
     this->lidarOffset = 0; this->sonarOffset = 0;
