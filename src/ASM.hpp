@@ -10,7 +10,7 @@
 #include "ThreadContext.hpp"
 
 // 32 byte message buffer size
-#define RCVBUFSIZE 64    
+#define RCVBUFSIZE 128    
 
 /**
  * @class ASM

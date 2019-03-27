@@ -10,7 +10,7 @@
 #include <vector>
 
 // Message buffer size
-#define BUFSIZE 64
+#define BUFSIZE 128
 
 /**
  * Event structure to hold event name and data

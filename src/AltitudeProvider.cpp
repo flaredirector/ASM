@@ -38,6 +38,9 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     #ifndef DEBUG
     this->dataFile.open(DATA_LOGGING_FILENAME);
     this->dataFile << "LIDAR,SONAR" << endl;
+
+    this->lidarDistance = 0;
+    this->sonarDistance = 0;
     
     // Attempt connection to the LIDAR interface
     this->lidar->connect();
@@ -65,15 +68,21 @@ void AltitudeProvider::acquireDataLoop() {
     FixedQueue *sonarBuffer = new FixedQueue(5);
     #ifndef DEBUG
     // Acquire data while both sensors are operational
-    while (this->lidar->err == 0 || this->sonar->err == 0) {
+    // this->lidar->err == 0 || this->sonar->err == 0
+    for (;;) {
         // Log the raw sensor data
         if (this->toggles->dataLoggingToggle)
             this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
-        // Push data into FIFO buffer
-        lidarBuffer->push(this->lidar->getDistance());
-        sonarBuffer->push(this->sonar->getDistance());
-
+        // // Push data into FIFO buffer
+        if (this->lidar->err == 0) {
+            lidarBuffer->push(this->lidar->getDistance());
+        }
+            
+        if (this->sonar->err == 0) {
+            sonarBuffer->push(this->sonar->getDistance());
+        }
+            
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
         // of range of sonar, which needs to be handled.
@@ -93,7 +102,7 @@ void AltitudeProvider::acquireDataLoop() {
         // TODO: Perform sensor weighting and signal processing
         int processedAltitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
 
-        this->altitude = processedAltitude;
+        this->altitude = 0;
     #else
     for (;;) {
         this->altitude--;

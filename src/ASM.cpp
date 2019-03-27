@@ -146,8 +146,9 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
             statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
             statusReply->encode();
             ctx->clientSocket->send(statusReply);
-
+            
             delete statusReply;
+            cout << "System status sent" << endl;
         } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
             cout << "Toggling data logging..." << endl;
             ctx->toggles->dataLoggingToggle = data ? true : false;
@@ -163,6 +164,8 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     } catch (SocketException &e) {
         cout << e.what() << " in handleEvent()" << endl;
     }
+
+    return;
 }
 
 /**
