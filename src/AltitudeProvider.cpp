@@ -97,8 +97,6 @@ void AltitudeProvider::acquireDataLoop() {
         // If adjusted sensor distance is less than 0, just set to 0
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
         this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
-            
-        // TODO: Perform sensor weighting and signal processing
 
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
