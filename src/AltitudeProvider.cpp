@@ -33,18 +33,21 @@ using namespace std;
 AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->toggles = asmToggles;
     
+    // Initialize sensor interfaces
     this->lidar = new LIDARInterface();
     this->sonar = new SONARInterface();
-    #ifndef DEBUG
+
+    // Open file up for data logging
     this->dataFile.open(DATA_LOGGING_FILENAME);
     this->dataFile << "LIDAR,SONAR" << endl;
 
+    // Set inital values
     this->lidarDistance = 0;
     this->sonarDistance = 0;
     this->lidarOffset = 0;
     this->sonarOffset = 0;
     
-    // Attempt connection to the LIDAR interface
+    // Connect and setup the sensors
     this->lidar->connect();
     this->sonar->setup();
 
@@ -55,9 +58,6 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     if (this->sonar->err < 0) {
         cout << "SONAR ERROR: " << this->sonar->err << endl;
     }
-    #else
-    this->altitude = 120;
-    #endif
 }
 
 /**
@@ -66,11 +66,11 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
  ** the data.
  */
 void AltitudeProvider::acquireDataLoop() {
+    // Initialize data buffers for sensor data
     FixedQueue *lidarBuffer = new FixedQueue(5);
     FixedQueue *sonarBuffer = new FixedQueue(5);
-    #ifndef DEBUG
+    
     // Acquire data while both sensors are operational
-    // this->lidar->err == 0 || this->sonar->err == 0
     for (;;) {
         // Log the raw sensor data
         if (this->toggles->dataLoggingToggle)
@@ -84,18 +84,16 @@ void AltitudeProvider::acquireDataLoop() {
             rawSonarDistance = this->sonar->getDistance();
 
         // Push data into FIFO buffer
-        if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE) {
+        // if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE)
             lidarBuffer->push(rawLidarDistance);
-        }
             
-        if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE) {
+        // if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE)
             sonarBuffer->push(rawSonarDistance);
-        }
 
         // Adjust sensor distances for calibration offsets
-        int adjustedSonarDistance = lidarBuffer->average() - this->sonarOffset;
-        int adjustedLidarDistance = sonarBuffer->average() - this->lidarOffset;
-
+        int adjustedLidarDistance = lidarBuffer->average() - this->lidarOffset;
+        int adjustedSonarDistance = sonarBuffer->average() - this->sonarOffset;
+        
         // If adjusted sensor distance is less than 0, just set to 0
         this->sonarDistance = (adjustedSonarDistance < 0) ? 0 : adjustedSonarDistance;
         this->lidarDistance = (adjustedLidarDistance < 0) ? 0 : adjustedLidarDistance;
@@ -111,13 +109,8 @@ void AltitudeProvider::acquireDataLoop() {
         } else {
             this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
         }
-        
-    #else
-    for (;;) {
-        this->altitude--;
-        if (this->altitude < 0)
-            this->altitude = 120;
-    #endif
+
+        // If reporting is on, run at 10hz, if not, 1hz
         if (this->toggles->reportingToggle)
             usleep(100 MILLISECONDS); // 10hz
         else

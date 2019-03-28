@@ -17,6 +17,10 @@
 #ifndef DEBUG
 #include <fcntl.h>	 //Used for UART
 #include <termios.h> //Used for UART
+#else
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+int testSonarAlt = 4000;
 #endif
 
 /**
@@ -27,6 +31,9 @@
 SONARInterface::SONARInterface() {
     // Set initial error code to 0 (OK)
     this->err = 0;
+    #ifdef DEBUG
+        srand(time(NULL));
+    #endif
 }
 
 /**
@@ -127,6 +134,14 @@ int SONARInterface::getDistance() {
             this->err = -3;
         }
     }
-    #endif
     return 0;
+    #else
+    if (testSonarAlt > 1068) {
+        testSonarAlt -= 25;
+        return 1068;
+    } else {
+        int noise = rand() % 200 - 50;
+        return (testSonarAlt < 0) ? testSonarAlt = 4000 : (testSonarAlt -= 25) + noise;
+    }   
+    #endif
 }

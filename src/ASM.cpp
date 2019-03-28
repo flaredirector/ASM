@@ -237,13 +237,8 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 hasSentSonarFailure = true;
             }
                 
-            #ifdef DEBUG
-            message->addEvent(LIDAR_DATA_EVENT, altitude + 12);
-            message->addEvent(SONAR_DATA_EVENT, altitude + 4);
-            #else
             message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
             message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
-            #endif
             message->encode();
 
             // Try sending message over connection

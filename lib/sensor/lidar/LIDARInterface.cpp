@@ -27,7 +27,10 @@
 #define LIDAR_LITE_DIST_READ_REG_2 = 0x98
 
 using namespace std;
-
+#else
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+int testLidarAlt = 4000;
 #endif
 
 /**
@@ -40,6 +43,8 @@ LIDARInterface::LIDARInterface (void){
 	#ifndef DEBUG
 	this->adapter_num = 1;
 	snprintf(this->filename, 19, "/dev/i2c-%d", this->adapter_num);
+	#else
+	srand(time(NULL));
 	#endif
 }
 
@@ -138,6 +143,8 @@ int LIDARInterface::getDistance( void ){
       	buf[1] = res;
     }
     return (buf[0] << 8) + buf[1];
+	#else
+	int noise = rand() % 200 - 50;
+	return (testLidarAlt < 0) ? testLidarAlt = 4000 : (testLidarAlt -= 25) + noise;
     #endif
-    return 0;
 }
