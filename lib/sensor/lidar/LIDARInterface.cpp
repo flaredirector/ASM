@@ -90,11 +90,11 @@ int LIDARInterface::connect( void ){
  */
 int LIDARInterface::writeAndWait(int writeRegister, int value){
 	#ifndef DEBUG
-	this->res = i2c_smbus_write_byte_data(i2c_bus, writeRegister, value);
+	this->res = i2c_smbus_write_byte_data(this->i2c_bus, writeRegister, value);
 	usleep(10000);
 	if (this->res < 0){
 		this->err = -1;
-		printf("Write Error %d\n", err);
+		printf("Write Error %d\n", this->err);
 		return -1;
 	}
 	#endif
@@ -107,7 +107,7 @@ int LIDARInterface::writeAndWait(int writeRegister, int value){
  */
 int LIDARInterface::readAndWait(int readRegister){
 	#ifndef DEBUG
-	this->res = i2c_smbus_read_byte_data(i2c_bus, readRegister);
+	this->res = i2c_smbus_read_byte_data(this->i2c_bus, readRegister);
 	usleep(10000);
 	if (this->res < 0){
 		this->err = -1;

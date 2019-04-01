@@ -9,6 +9,9 @@
 
 #include "ASM.hpp"
 #include "Events.hpp"
+#include "../lib/gpio/errorCodeDisplay/ErrorCodeDisplay.hpp"
+#include "../lib/gpio/led/LEDInterface.hpp"
+#include "../lib/gpio/battery/BatteryInterface.hpp"
 #include <iostream>           // For cout, cerr
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
@@ -33,6 +36,16 @@ ASM::ASM(unsigned short int port) {
     this->toggles->reportingToggle = false;
     this->toggles->dataLoggingToggle = false;
     this->toggles->hasBeenCalibrated = false;
+
+    ErrorCodeDisplay::setupPins();
+    ErrorCodeDisplay::display(0);
+
+    LEDInterface::setupPins();
+    LEDInterface::setColor(LED_RED);
+
+    BatteryInterface *bi = new BatteryInterface();
+    bi->setup();
+    cout << bi->getPercentage() << "%" << endl;
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
