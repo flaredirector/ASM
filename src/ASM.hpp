@@ -7,10 +7,7 @@
  * definitions for the ASM class.
 */
 
-#include "ThreadContext.hpp"
-
-// 32 byte message buffer size
-#define RCVBUFSIZE 128    
+#include "ThreadContext.hpp" 
 
 /**
  * @class ASM
@@ -25,7 +22,8 @@ class ASM {
         ~ASM();
         void start();
         TCPServerSocket *serverSocket;
- 	AltitudeProvider *altitudeProvider;   
+ 	    AltitudeProvider *altitudeProvider;   
+        BatteryInterface *battery;
     private:
         int port;
         ASMToggles *toggles;

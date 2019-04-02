@@ -21,3 +21,4 @@
 #define LIDAR_DATA_EVENT "lidarData"
 #define SONAR_DATA_EVENT "sonarData"
 #define GET_STATUS_EVENT "getStatus"
+#define BATTERY_STATUS_EVENT "batteryStatus"

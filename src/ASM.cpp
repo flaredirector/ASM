@@ -11,7 +11,6 @@
 #include "Events.hpp"
 #include "../lib/gpio/errorCodeDisplay/ErrorCodeDisplay.hpp"
 #include "../lib/gpio/led/LEDInterface.hpp"
-#include "../lib/gpio/battery/BatteryInterface.hpp"
 #include <iostream>           // For cout, cerr
 #include <pthread.h>          // For POSIX threads  
 #include <unistd.h>           // For usleep()
@@ -37,15 +36,17 @@ ASM::ASM(unsigned short int port) {
     this->toggles->dataLoggingToggle = false;
     this->toggles->hasBeenCalibrated = false;
 
+    // Setup the GPIO pins for 7SD and LEDs
     ErrorCodeDisplay::setupPins();
-    ErrorCodeDisplay::display(0);
-
     LEDInterface::setupPins();
+    
+    // Display initial values
+    ErrorCodeDisplay::display(0);
     LEDInterface::setColor(LED_RED);
 
-    BatteryInterface *bi = new BatteryInterface();
-    bi->setup();
-    cout << bi->getPercentage() << "%" << endl;
+    // Instantiate and setup new battery interface
+    this->battery = new BatteryInterface();
+    this->battery->setup();
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
@@ -103,7 +104,7 @@ void ASM::listenForConnections() {
         cout << "Client Connected" << endl;
 
         // Create new thread task
-        ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider, this->toggles);
+        ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider, this->toggles, this->battery);
 
         // Spawn thread for sending client altitude data
         pthread_t firstThreadID;
@@ -157,6 +158,7 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
             statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
             statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
             statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+            statusReply->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
             statusReply->encode();
             ctx->clientSocket->send(statusReply);
             
@@ -189,9 +191,9 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
 void ASM::handleClientMessage(ThreadContext *ctx) {
     // Check if there is any received message from client
     try {
-        char buffer[RCVBUFSIZE];
+        char buffer[BUFSIZE];
         int recvMsgSize;
-        while ((recvMsgSize = ctx->clientSocket->recv(buffer, RCVBUFSIZE)) > 0) { // Zero means end of transmission
+        while ((recvMsgSize = ctx->clientSocket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
             // Convert into string for easier use
             string bufferString = buffer; 
 
@@ -210,7 +212,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
             delete message;
 
             // Flush the input message buffer
-            memset(buffer, '\0', RCVBUFSIZE);
+            memset(buffer, '\0', BUFSIZE);
         }
 
         // Set ThreadContext socketIsAlive boolean to false to trigger the exit of the
@@ -232,14 +234,12 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     // While the ThreadContext socketIsAlive toggle is set to true, run the loop.
     // The loop will exit when socketIsAlive is set to false by the handleClientMessage
     // thread when a client disconnects.
+    int counter = 0;
     bool hasSentLidarFailure = false, hasSentSonarFailure = false;
     while (ctx->socketIsAlive) {
         if (ctx->toggles->reportingToggle && ctx->toggles->hasBeenCalibrated) {
-            // Get altitude data from provider
-            int altitude = ctx->altitudeProvider->getAltitude();
-            
             // Encode altitude into message for transmission
-            Message *message = new Message(ALTITUDE_EVENT, altitude);
+            Message *message = new Message(ALTITUDE_EVENT, ctx->altitudeProvider->getAltitude());
 
             if (ctx->altitudeProvider->lidar->err < 0 && !hasSentLidarFailure) {
                 message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
@@ -252,6 +252,12 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 
             message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
             message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            // Every 20 seconds, send along a battery status
+            if (counter == 200) {
+                message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+                counter = 0;
+            }
+                
             message->encode();
 
             // Try sending message over connection
@@ -265,10 +271,23 @@ void ASM::reportAltitude(ThreadContext *ctx) {
 
             // Free up message memory to prevent memory leak
             delete message;
-        }
 
+        // If reporting isn't on, send battery status every 20 seconds.
+        } else {
+            if (counter == 200) {
+                Message *m = new Message(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+                m->encode();
+                ctx->clientSocket->send(m);
+                delete m;
+                counter = 0;
+            }
+            
+        }
+            
+        counter++;
+        
         // 100 milliseconds (10 Hz)
-        usleep(100 MILLISECONDS); 
+        usleep(100 MILLISECONDS);
     }
 }
 

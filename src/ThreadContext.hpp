@@ -8,6 +8,7 @@
 */
 
 #include "../lib/network/NetworkSocket.hpp"  // For Sockets
+#include "../lib/gpio/battery/BatteryInterface.hpp"
 #include "AltitudeProvider.hpp"
 
 /**
@@ -22,6 +23,7 @@ class ThreadContext {
     TCPSocket *clientSocket;
     AltitudeProvider *altitudeProvider;
     ASMToggles *toggles;
-    ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t);
+    BatteryInterface *battery;
+    ThreadContext(TCPSocket *cs, AltitudeProvider *ap, ASMToggles *t, BatteryInterface *b);
     bool socketIsAlive;
 };

@@ -8,15 +8,14 @@
 */
 
 #include "BatteryInterface.hpp"
-
 #ifndef DEBUG
-#include <fcntl.h>			// open
+#include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #endif
 
-#include <unistd.h>			// close read write
-#include <stdio.h>			// printf
+#include <unistd.h>
+#include <stdio.h>
 #include <time.h>
 #include <iostream>
 
@@ -101,6 +100,6 @@ int BatteryInterface::getPercentage() {
     // Voltage: (((float)voltage)* 78.125 / 1000000.0)
     return ((int)((float)v) / 256.0);
     #else
-    return 69;
+    return 27;
     #endif
 }

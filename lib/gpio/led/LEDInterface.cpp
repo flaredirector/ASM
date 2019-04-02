@@ -15,8 +15,8 @@
 
 // Pin values in correlation to wiring pi values
 #define pinRED   3
-#define pinBLUE  6
 #define pinGREEN 4
+#define pinBLUE  6
 
 using namespace std;
 
