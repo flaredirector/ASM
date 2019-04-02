@@ -46,17 +46,22 @@ void ErrorCodeDisplay::setupPins() {
  * @param {code} The code to display
  */
 void ErrorCodeDisplay::display(int code) {
-    if (code < 0 || code > 9)
+    if (code < -1 || code > 9)
         return;
 
     // Perform binary conversion
     int binMap[4];
-    for (int i = 3; i >= 0; i--) { 
-        int k = code >> i; 
-        if (k & 1) 
-            binMap[i] = 1; 
-        else
-            binMap[i] = 0;
+    for (int i = 3; i >= 0; i--) {
+        // If code is -1 (Display Nothing), fill binary map with all 1s
+        if (code == -1) {
+            binMap[i] = 1;
+        } else {
+            int k = code >> i; 
+            if (k & 1) 
+                binMap[i] = 1; 
+            else
+                binMap[i] = 0;
+        }
     }
 
     // Set pins to correct values based on bit map index

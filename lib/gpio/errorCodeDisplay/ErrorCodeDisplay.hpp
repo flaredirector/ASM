@@ -8,6 +8,8 @@
  * between 0 and 9.
 */
 
+#define SSD_NOTHING -1
+
 class ErrorCodeDisplay {
     public:
         static void setupPins();

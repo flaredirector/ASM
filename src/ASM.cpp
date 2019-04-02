@@ -41,12 +41,14 @@ ASM::ASM(unsigned short int port) {
     LEDInterface::setupPins();
     
     // Display initial values
-    ErrorCodeDisplay::display(0);
+    ErrorCodeDisplay::display(SSD_NOTHING);
     LEDInterface::setColor(LED_RED);
 
     // Instantiate and setup new battery interface
     this->battery = new BatteryInterface();
-    this->battery->setup();
+    int batteryError = this->battery->setup();
+    if (batteryError != 0)
+        cout << "Battery Interface Error: " << batteryError << endl;
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
@@ -285,7 +287,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
         }
             
         counter++;
-        
+
         // 100 milliseconds (10 Hz)
         usleep(100 MILLISECONDS);
     }
