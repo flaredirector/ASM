@@ -103,6 +103,7 @@ int BatteryInterface::getPercentage() {
     // Voltage: (((float)voltage)* 78.125 / 1000000.0)
     return ((int)((float)v) / 256.0);
     #else
-    return 47;
+    static int p = 80;
+    return (p == 0) ? p = 100 : p -= 10;
     #endif
 }

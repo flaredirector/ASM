@@ -87,6 +87,7 @@ void ASM::start() {
  ** each connection.
  */
 void ASM::listenForConnections() {
+    LEDInterface::setColor(LED_GREEN);
     // Run forever  
     for (;;) {      
         cout << "Waiting for Client Connection..." << endl;
@@ -136,11 +137,11 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         cout << "Starting calibration..." << endl;
-        int e = ctx->altitudeProvider->calibrate();
-        statusReply = new Message(CALIBRATION_STATUS_EVENT, e);
+        statusReply = new Message(CALIBRATION_STATUS_EVENT, ctx->altitudeProvider->calibrate());
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
+        ctx->toggles->reportingToggle ? LEDInterface::setColor(LED_BLUE) : LEDInterface::setColor(LED_GREEN);
         statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
     } else if (event == GET_STATUS_EVENT) {
         cout << "Sending system status..." << endl;
@@ -157,8 +158,6 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     } else {
         cout << "Parsed unrecognized event" << endl;
     }
-
-    statusReply->encode();
 
     // Try sending message over connection
     try {
@@ -245,8 +244,6 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
                 counter = 0;
             }
-                
-            message->encode();
 
             // Try sending message over connection
             try {
@@ -265,7 +262,6 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             if (counter == 200) {
                 // Encode battery level into message
                 Message *m = new Message(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
-                m->encode();
 
                 // Try sending message over connection
                 try {

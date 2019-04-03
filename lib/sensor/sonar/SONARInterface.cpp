@@ -20,7 +20,6 @@
 #else
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
-int testSonarAlt = 4000;
 #endif
 
 /**
@@ -136,6 +135,7 @@ int SONARInterface::getDistance() {
     }
     return 0;
     #else
+    static int testSonarAlt = 4000;
     if (testSonarAlt > 1068) {
         testSonarAlt -= 25;
         return 1068;

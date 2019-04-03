@@ -30,7 +30,6 @@ using namespace std;
 #else
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
-int testLidarAlt = 4000;
 #endif
 
 /**
@@ -144,6 +143,7 @@ int LIDARInterface::getDistance( void ){
     }
     return (buf[0] << 8) + buf[1];
 	#else
+	static int testLidarAlt = 4000;
 	int noise = rand() % 200 - 50;
 	return (testLidarAlt < 0) ? testLidarAlt = 4000 : (testLidarAlt -= 25) + noise;
     #endif
