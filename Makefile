@@ -32,7 +32,7 @@ client: demo/TCPEchoClient.cpp $(NETWORK)
 	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp $(NETWORK) $(LIBS)
 
 main: $(SRC) $(NETWORK) $(LIDAR)
-	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(SRC) $(NETWORK) $(LIDAR) $(SONAR) $(LIBS) -lpthread
+	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(BATTERY) $(ERROR_DISPLAY) $(LED) $(SRC) $(NETWORK) $(LIDAR) $(SONAR) $(LIBS) -lpthread -lwiringPi
 
 debug: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(DEBUG_BINARY) $(BATTERY) $(ERROR_DISPLAY) $(LED) $(LIDAR) $(SONAR) $(NETWORK) $(SRC) $(LIBS) -lpthread -DDEBUG -ggdb -O0
