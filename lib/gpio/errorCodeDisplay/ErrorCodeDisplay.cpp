@@ -26,7 +26,6 @@ using namespace std;
  ** Sets up the GPIO pins for writing.
  */
 void ErrorCodeDisplay::setupPins() {
-    cout << "Setting up 7 Segment Display..." << endl;
     #ifndef DEBUG
     #ifndef WIRINGPI_SETUP
     wiringPiSetup();

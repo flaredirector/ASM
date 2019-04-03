@@ -59,7 +59,6 @@ static int readReg(int busfd, __uint16_t reg, unsigned char *buf, int bufsize)
  ** sets up the I2C interface for communicating with the UPS.
  */
 int BatteryInterface::setup() {
-    cout << "Setting up Battery Interface..." << endl;
     #ifndef DEBUG
     if ((this->busFileDescriptor = open(DEV, O_RDWR)) < 0) {
         cout << "Can't open " << DEV << " (running as root?)" << endl;
@@ -85,14 +84,17 @@ int BatteryInterface::getPercentage() {
     #ifndef DEBUG
     unsigned char buf[BUFSIZE] = {0};
     // int voltage = 10000000;
-    readReg(this->busFileDescriptor, VREG, buf, 2);
+    if (readReg(this->busFileDescriptor, VREG, buf, 2) < 0)
+        return -1;
 	
     int hi,lo;
     hi = buf[0];
     lo = buf[1];
     // voltage = (hi << 8)+lo;
 
-    readReg(this->busFileDescriptor, CREG, buf, 2);
+    if (readReg(this->busFileDescriptor, CREG, buf, 2) < 0)
+        return -1;
+        
     hi = buf[0];
     lo = buf[1];
     int v = (hi << 8)+lo;
@@ -100,6 +102,6 @@ int BatteryInterface::getPercentage() {
     // Voltage: (((float)voltage)* 78.125 / 1000000.0)
     return ((int)((float)v) / 256.0);
     #else
-    return 27;
+    return 47;
     #endif
 }

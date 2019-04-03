@@ -25,7 +25,6 @@ using namespace std;
  ** Sets up the GPIO pins for writing.
  */
 void LEDInterface::setupPins() {
-    cout << "Setting up LED pins..." << endl;
     #ifndef DEBUG
     #ifndef WIRINGPI_SETUP
     wiringPiSetup();

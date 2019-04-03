@@ -60,8 +60,6 @@ ASM::ASM(unsigned short int port) {
  ** acquisition thread, and begins listening for new connections.
  */
 void ASM::start() {
-    cout << "Starting ASM..." << endl;
-
     try {
         // Create new socket descriptor for server
         this->serverSocket = new TCPServerSocket(this->port);  
@@ -160,6 +158,7 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
             statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
             statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
             statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+            statusReply->addEvent(CALIBRATION_STATUS_EVENT, ctx->toggles->hasBeenCalibrated ? 0 : 1);
             statusReply->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
             statusReply->encode();
             ctx->clientSocket->send(statusReply);
@@ -277,13 +276,22 @@ void ASM::reportAltitude(ThreadContext *ctx) {
         // If reporting isn't on, send battery status every 20 seconds.
         } else {
             if (counter == 200) {
+                // Encode battery level into message
                 Message *m = new Message(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
                 m->encode();
-                ctx->clientSocket->send(m);
+
+                // Try sending message over connection
+                try {
+                    ctx->clientSocket->send(m);
+                } catch (SocketException &e) {
+                    cerr << e.what() << endl;
+                    return;
+                }
+                
+                // Free up message memory
                 delete m;
                 counter = 0;
             }
-            
         }
             
         counter++;
