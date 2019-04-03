@@ -130,8 +130,9 @@ void ASM::listenForConnections() {
  * @param {ctx} The current ThreadContext 
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
+    // Status reply message to send back to the client
     Message *statusReply;
-    
+
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         cout << "Starting calibration..." << endl;
@@ -159,6 +160,7 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
 
     statusReply->encode();
 
+    // Try sending message over connection
     try {
         ctx->clientSocket->send(statusReply);
         delete statusReply;
