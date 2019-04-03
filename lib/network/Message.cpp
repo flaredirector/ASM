@@ -81,7 +81,7 @@ void Message::addEvent(string event, int data) {
  ** Encodes the parsed evnets into a transmittable message.
  */
 void Message::encode() {
-    string packet;
+    string packet = "";
     for (int i = 0; i < this->events.size(); i++) {
         packet += this->events[i].event;
         packet += ":";

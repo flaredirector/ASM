@@ -130,52 +130,38 @@ void ASM::listenForConnections() {
  * @param {ctx} The current ThreadContext 
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
+    Message *statusReply;
+    
+    // Decide what to do based on received event
+    if (event == CALIBRATION_EVENT) {
+        cout << "Starting calibration..." << endl;
+        int e = ctx->altitudeProvider->calibrate();
+        statusReply = new Message(CALIBRATION_STATUS_EVENT, e);
+    } else if (event == REPORTING_TOGGLE_EVENT) {
+        cout << "Toggling reporting..." << endl;
+        ctx->toggles->reportingToggle = data ? true : false;
+        statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+    } else if (event == GET_STATUS_EVENT) {
+        cout << "Sending system status..." << endl;
+        statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+        statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+        statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
+        statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+        statusReply->addEvent(CALIBRATION_STATUS_EVENT, ctx->toggles->hasBeenCalibrated ? 0 : 1);
+        statusReply->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+    } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
+        cout << "Toggling data logging..." << endl;
+        ctx->toggles->dataLoggingToggle = data ? true : false;
+        statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
+    } else {
+        cout << "Parsed unrecognized event" << endl;
+    }
+
+    statusReply->encode();
+
     try {
-        // Decide what to do based on received event
-        if (event == CALIBRATION_EVENT) {
-            cout << "Starting calibration..." << endl;
-            int e = ctx->altitudeProvider->calibrate();
-
-            // Encode calibration reply message
-            Message *calibrationReply = new Message(CALIBRATION_STATUS_EVENT, e);
-            calibrationReply->encode();
-            ctx->clientSocket->send(calibrationReply);
-
-            delete calibrationReply;
-        } else if (event == REPORTING_TOGGLE_EVENT) {
-            cout << "Toggling reporting..." << endl;
-            ctx->toggles->reportingToggle = data ? true : false;
-
-            Message *statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
-            statusReply->encode();
-            ctx->clientSocket->send(statusReply);
-
-            delete statusReply;
-        } else if (event == GET_STATUS_EVENT) {
-            cout << "Sending system status..." << endl;
-
-            Message *statusReply = new Message(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
-            statusReply->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
-            statusReply->addEvent(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
-            statusReply->addEvent(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
-            statusReply->addEvent(CALIBRATION_STATUS_EVENT, ctx->toggles->hasBeenCalibrated ? 0 : 1);
-            statusReply->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
-            statusReply->encode();
-            ctx->clientSocket->send(statusReply);
-            
-            delete statusReply;
-        } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
-            cout << "Toggling data logging..." << endl;
-            ctx->toggles->dataLoggingToggle = data ? true : false;
-
-            Message *statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
-            statusReply->encode();
-            ctx->clientSocket->send(statusReply);
-
-            delete statusReply;
-        } else {
-            cout << "Parsed unrecognized event" << endl;
-        }
+        ctx->clientSocket->send(statusReply);
+        delete statusReply;
     } catch (SocketException &e) {
         cout << e.what() << " in handleEvent()" << endl;
     }
