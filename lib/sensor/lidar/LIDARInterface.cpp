@@ -68,16 +68,16 @@ LIDARInterface::~LIDARInterface( void ) {
  */
 int LIDARInterface::connect( void ){
 	#ifndef DEBUG
-	printf("Connecting to Lidar: %s\n", this->filename);
+	printf("Connecting to Lidar...\n");
 	this->i2c_bus = open(filename, O_RDWR);
 	if (this->i2c_bus < 0){
 		this->err = -1;
-		printf("Connect Error: %d\n", this->err);
+		printf("Lidar Connection Error: %d\n", this->err);
 		return -1;
 	}
 	if (ioctl(i2c_bus, I2C_SLAVE, 0x62) < 0) {
 		this->err = -1;
-		printf("Bus Error: %d\n", this->err);
+		printf("Lidar Bus Error: %d\n", this->err);
 		return -1;
 	}
 	#endif
@@ -94,7 +94,7 @@ int LIDARInterface::writeAndWait(int writeRegister, int value){
 	usleep(10000);
 	if (this->res < 0){
 		this->err = -1;
-		printf("Write Error %d\n", this->err);
+		printf("Lidar Write Error %d\n", this->err);
 		return -1;
 	}
 	#endif
@@ -111,7 +111,7 @@ int LIDARInterface::readAndWait(int readRegister){
 	usleep(10000);
 	if (this->res < 0){
 		this->err = -1;
-		printf("Read Error: %d\n", this->err);
+		printf("Lidar Read Error: %d\n", this->err);
 		return -1;
 	}
 	#endif

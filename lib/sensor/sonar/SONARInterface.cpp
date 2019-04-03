@@ -64,7 +64,7 @@ int SONARInterface::setup() {
     if (this->uartFilestream == -1)
     {
         //ERROR - CAN'T OPEN SERIAL PORT
-        printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
+        printf("Sonar Error - Unable to open UART. Ensure it is not in use by another application\n");
         return this->err = -2;
     }
 

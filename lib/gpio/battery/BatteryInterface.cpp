@@ -44,7 +44,8 @@ static int readReg(int busfd, __uint16_t reg, unsigned char *buf, int bufsize)
     int ret = write(busfd, reg_buf, 2);
 
     if (ret < 0) {
-        printf("Write failed trying to read reg: %04x (0x%02x 0x%02x)\n", reg, reg_buf[0], reg_buf[1], reg);
+        // printf("Write failed trying to read reg: %04x (0x%02x 0x%02x)\n", reg, reg_buf[0], reg_buf[1], reg);
+        cout << "Write failed trying to read register for Battery Interface." << endl;
         return ret;
     }
 
@@ -66,11 +67,11 @@ int BatteryInterface::setup() {
     }
 
     int ret = ioctl(this->busFileDescriptor, I2C_SLAVE, ADRS);
-    if (ret < 0)
-        cout << "I2C device initialisation failed" << endl;
-
-    if (ret < 0)
+    if (ret < 0) {
+        cout << "Battery Interface initialization failed" << endl;
         return(-1);
+    }
+
     #endif
     cout << "Done setting up Battery Interface" << endl;
     return 0;
