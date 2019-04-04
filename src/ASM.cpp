@@ -239,6 +239,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 
             message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
             message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            
             // Every 20 seconds, send along a battery status
             if (counter == 200) {
                 message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
