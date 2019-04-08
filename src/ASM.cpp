@@ -104,7 +104,7 @@ void ASM::listenForConnections() {
 
         cout << "Client Connected" << endl;
 
-        // Create new thread task
+        // Create new thread context
         ThreadContext *ctx = new ThreadContext(clientSocket, this->altitudeProvider, this->toggles, this->battery);
 
         // Spawn thread for sending client altitude data

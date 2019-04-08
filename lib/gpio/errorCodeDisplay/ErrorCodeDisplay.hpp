@@ -13,5 +13,5 @@
 class ErrorCodeDisplay {
     public:
         static void setupPins();
-        static void display(int code);
+        static void display(short int code);
 };

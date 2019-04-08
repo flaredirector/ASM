@@ -44,7 +44,7 @@ void ErrorCodeDisplay::setupPins() {
  ** Displays the passed error code.
  * @param {code} The code to display
  */
-void ErrorCodeDisplay::display(int code) {
+void ErrorCodeDisplay::display(short int code) {
     if (code < -1 || code > 9)
         return;
 
