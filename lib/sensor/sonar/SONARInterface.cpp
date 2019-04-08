@@ -116,6 +116,8 @@ int SONARInterface::getDistance() {
         this->rx_buffer[rx_length] = '\0';
         // Check for valid buffer data
         if (this->rx_buffer[0] == 'R') {
+            this->err = 0;
+
             char data_buffer[4];
             // Fill data buffer with rx_buffer, but without 'R'
             for (int index = 0; index < 4; index++) {
