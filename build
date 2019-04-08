@@ -1,0 +1,13 @@
+#!/bin/sh
+if [ ! -d "bin" ]
+then
+  mkdir bin
+fi
+if [ "$1" == "d" ]
+then
+  echo "Compiling debug program..."
+  make debug
+else
+  echo "Compiling production program..."
+  make
+fi

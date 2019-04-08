@@ -11,6 +11,7 @@
 
 #include "AltitudeProvider.hpp"
 #include "FixedQueue.hpp"
+#include <iostream>
 #include <unistd.h>  // for usleep
 
 #define LIDAR_FACTOR 0.8

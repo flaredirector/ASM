@@ -7,7 +7,6 @@
 #
 
 CXX = g++
-CXXFLAGS = -Wall -pedantic -g -lpthread
 
 # Targets
 LIDAR = lib/sensor/lidar/*.cpp
@@ -29,7 +28,7 @@ endif
 all: main
 
 client: demo/TCPEchoClient.cpp $(NETWORK)
-	$(CXX) $(CXXFLAGS) -o bin/client demo/TCPEchoClient.cpp $(NETWORK) $(LIBS)
+	$(CXX) -D_GNU_SOURCE -o bin/client demo/TCPEchoClient.cpp $(NETWORK) $(LIBS) -g -lpthread
 
 main: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(BINARY) $(BATTERY) $(ERROR_DISPLAY) $(LED) $(SRC) $(NETWORK) $(LIDAR) $(SONAR) $(LIBS) -lpthread -lwiringPi
@@ -38,4 +37,4 @@ debug: $(SRC) $(NETWORK) $(LIDAR)
 	$(CXX) -D_GNU_SOURCE -o $(DEBUG_BINARY) $(BATTERY) $(ERROR_DISPLAY) $(LED) $(LIDAR) $(SONAR) $(NETWORK) $(SRC) $(LIBS) -lpthread -DDEBUG -ggdb -O0
 
 clean:
-	$(RM) -rf bin/client.dSYM && $(RM) -f bin/*
+	$(RM) -rf bin/* && rmdir bin

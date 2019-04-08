@@ -1,45 +1,22 @@
+/**
+ * Flare Director
+ * ASM
+ * FixedQueue.hpp
+ * 
+ * This file contains the class definition for the FixedQueue class
+ * which is a data structure that implements a fixed length FIFO queue.
+ */
+
 #include <deque>
-#include <iostream>
 
 class FixedQueue {
     public:
-    FixedQueue(int s) {
-        this->size = s;
-    }
-
-    void push(int data) {
-        if (this->d.size() == this->size)
-            this->d.pop_back();
-        this->d.push_front(data);
-    }
-
-    std::deque<int> get() {
-        return this->d;
-    }
-
-    bool full() {
-        return this->d.size() == this->size;
-    }
-
-    void print() {
-        std::deque<int> copy = this->d;
-        while (!copy.empty()) {
-            std::cout << copy.front() << " ";
-            copy.pop_front();
-        }
-
-        std::cout << std::endl;
-    }
-
-    int average() {
-        int total = 0;
-        std::deque<int> copy = this->d;
-        while (!copy.empty()) {
-            total += copy.front();
-            copy.pop_front();
-        }
-        return (int)(total / this->size);
-    }
+    FixedQueue(int s);
+    void push(int data);
+    std::deque<int> get();
+    bool full();
+    void print();
+    int average();
 
     private:
     int size;
