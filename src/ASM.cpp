@@ -35,6 +35,7 @@ ASM::ASM(unsigned short int port) {
     this->toggles->reportingToggle = false;
     this->toggles->dataLoggingToggle = false;
     this->toggles->hasBeenCalibrated = false;
+    this->toggles->ledFlashing = false;
 
     // Setup the GPIO pins for 7SD and LEDs
     ErrorCodeDisplay::setupPins();
@@ -60,6 +61,10 @@ ASM::ASM(unsigned short int port) {
  ** acquisition thread, and begins listening for new connections.
  */
 void ASM::start() {
+   pthread_t ledThreadId;
+   if (pthread_create(&ledThreadId, NULL, &ASM::ledFlashingThreadHelper, (void *) this->toggles) != 0)
+     cout << "cant create led thread" << endl;
+
     try {
         // Create new socket descriptor for server
         this->serverSocket = new TCPServerSocket(this->port);  
@@ -87,6 +92,7 @@ void ASM::start() {
  ** each connection.
  */
 void ASM::listenForConnections() {
+    this->toggles->ledFlashing = true;
     LEDInterface::setColor(LED_GREEN);
     // Run forever  
     for (;;) {      
@@ -350,6 +356,26 @@ void *ASM::acquireAltitudeDataCS(void *ctx) {
     return NULL;
 }
 
+void *ASM::ledFlashingThreadCS(void *ctx) {
+    if (pthread_detach(pthread_self()) < 0) {
+	cout << "Unable to detach thread" << endl;
+	return NULL;
+    }
+
+    for (;;) {
+       //cout << "Current: " << LEDInterface::currentColor << endl;
+       int cc = LEDInterface::currentColor;
+       usleep(500 MILLISECONDS);
+       if (((ASMToggles *) ctx)->ledFlashing)
+           LEDInterface::setColor(LED_OFF);
+       usleep(500 MILLISECONDS);
+       if (((ASMToggles *) ctx)->ledFlashing)
+       	   LEDInterface::setColor(cc);
+   }
+
+   return NULL;
+}
+
 /**
  * reportAltitudeThreadHelper
  ** Helper method that enables threadMain to get called in 
@@ -378,4 +404,8 @@ void *ASM::handleClientMessageThreadHelper(void *ctx) {
  */
 void *ASM::acquireAltitudeDataThreadHelper(void *ctx) {
     return ((ASM *)ctx)->acquireAltitudeDataCS(ctx);
+}
+
+void *ASM::ledFlashingThreadHelper(void *ctx) {
+    return ((ASM *)ctx)->ledFlashingThreadCS(ctx);
 }

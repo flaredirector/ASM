@@ -20,6 +20,8 @@
 
 using namespace std;
 
+int LEDInterface::currentColor = 3;
+
 /**
  * ASM
  ** Sets up the GPIO pins for writing.
@@ -43,7 +45,7 @@ void LEDInterface::setupPins() {
  * @param {color} The color to set the LED to.
  */
 void LEDInterface::setColor(int color) {
-    if (color < 3 || color > 7)
+    if (color < 2 || color > 7)
         return;
 
     // Perform binary conversion
@@ -62,6 +64,6 @@ void LEDInterface::setColor(int color) {
     digitalWrite(pinBLUE, binMap[1] ? HIGH : LOW);  
     digitalWrite(pinRED, binMap[2] ? HIGH : LOW); 
     #endif
-
+    LEDInterface::currentColor = color;
     cout << "Set LED to " << color << endl;
 }

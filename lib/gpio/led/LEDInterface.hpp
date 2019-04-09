@@ -7,6 +7,7 @@
  * main status LED on the PCB. 
 */
 
+#define LED_YELLOW 2
 #define LED_RED 3
 #define LED_PURPLE 4
 #define LED_BLUE 5
@@ -15,6 +16,7 @@
 
 class LEDInterface {
     public:
+	static int currentColor;
         static void setupPins();
         static void setColor(int color);
 };
