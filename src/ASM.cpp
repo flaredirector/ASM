@@ -92,7 +92,6 @@ void ASM::start() {
  ** each connection.
  */
 void ASM::listenForConnections() {
-    this->toggles->ledFlashing = true;
     LEDInterface::setColor(LED_GREEN);
     // Run forever  
     for (;;) {      
@@ -356,21 +355,29 @@ void *ASM::acquireAltitudeDataCS(void *ctx) {
     return NULL;
 }
 
+/**
+ * ledFlashingThreadCS
+ ** Method that executes when pthread_create is called which
+ ** controls the flashing of the satus LED.
+ * @param {ctx} The context passed during thread creation.
+ */
 void *ASM::ledFlashingThreadCS(void *ctx) {
+    // Guarantees that thread resources are deallocated upon return 
     if (pthread_detach(pthread_self()) < 0) {
-	cout << "Unable to detach thread" << endl;
-	return NULL;
+	    cout << "Unable to detach thread" << endl;
+	    return NULL;
     }
 
+    // Loop forever
     for (;;) {
-       //cout << "Current: " << LEDInterface::currentColor << endl;
-       int cc = LEDInterface::currentColor;
-       usleep(500 MILLISECONDS);
-       if (((ASMToggles *) ctx)->ledFlashing)
+        // Get current color of the status LED
+        int cc = LEDInterface::currentColor;
+        usleep(500 MILLISECONDS);
+        if (((ASMToggles *) ctx)->ledFlashing) {
            LEDInterface::setColor(LED_OFF);
-       usleep(500 MILLISECONDS);
-       if (((ASMToggles *) ctx)->ledFlashing)
-       	   LEDInterface::setColor(cc);
+            usleep(500 MILLISECONDS);
+           LEDInterface::setColor(cc);
+       }   
    }
 
    return NULL;
@@ -406,6 +413,12 @@ void *ASM::acquireAltitudeDataThreadHelper(void *ctx) {
     return ((ASM *)ctx)->acquireAltitudeDataCS(ctx);
 }
 
+/**
+ * ledFlashingThreadHelper
+ ** Helper method that enables ledFlashingThreadCS to 
+ ** get called in pthread_create.
+ * @param {ctx} The ASMToggles pointer passed during thread creation.
+ */
 void *ASM::ledFlashingThreadHelper(void *ctx) {
     return ((ASM *)ctx)->ledFlashingThreadCS(ctx);
 }

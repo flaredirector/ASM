@@ -37,10 +37,10 @@ class ASM {
         void *reportAltitudeCS(void *ctx);
         void *handleClientMessageCS(void *ctx);
         void *acquireAltitudeDataCS(void *ctx);
-	void *ledFlashingThreadCS(void *ctx);
+	    void *ledFlashingThreadCS(void *ctx);
 
         static void *reportAltitudeThreadHelper(void *ctx);
         static void *handleClientMessageThreadHelper(void *ctx);
         static void *acquireAltitudeDataThreadHelper(void *ctx);
-	static void *ledFlashingThreadHelper(void *ctx);
+	    static void *ledFlashingThreadHelper(void *ctx);
 };

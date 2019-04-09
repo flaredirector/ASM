@@ -16,7 +16,7 @@
 
 class LEDInterface {
     public:
-	static int currentColor;
+	    static int currentColor;
         static void setupPins();
         static void setColor(int color);
 };
