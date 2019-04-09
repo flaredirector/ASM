@@ -141,6 +141,7 @@ int LIDARInterface::getDistance( void ){
     } else {
       	buf[1] = res;
     }
+	this->err = 0;
     return (buf[0] << 8) + buf[1];
 	#else
 	static int testLidarAlt = 4000;

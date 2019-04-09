@@ -108,9 +108,11 @@ int SONARInterface::getDistance() {
     if (rx_length < 0) {
         // An error occured (will occur if there are no bytes)
         this->err = -1;
+        return -1;
     } else if (rx_length == 0) {
         // No data waiting
         this->err = -2;
+        return -1;
     } else {
         // Bytes received
         this->rx_buffer[rx_length] = '\0';
@@ -134,6 +136,8 @@ int SONARInterface::getDistance() {
         if (this->rx_buffer[1] == '\0') {
             this->err = -3;
         }
+
+        return -1;
     }
     return 0;
     #else

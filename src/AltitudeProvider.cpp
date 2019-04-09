@@ -79,16 +79,14 @@ void AltitudeProvider::acquireDataLoop() {
 
         // Get sensor data
         int rawLidarDistance = 0, rawSonarDistance = 1068; 
-        if (this->lidar->err == 0)
-            rawLidarDistance = this->lidar->getDistance();
-        if (this->sonar->err == 0)
-            rawSonarDistance = this->sonar->getDistance();
+        rawLidarDistance = this->lidar->getDistance();
+        rawSonarDistance = this->sonar->getDistance();
 
         // Push data into FIFO buffer
-        // if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE)
+        if (rawLidarDistance != -1 && this->lidar->err == 0)
             lidarBuffer->push(rawLidarDistance);
             
-        // if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE)
+        if (rawSonarDistance != -1 && this->sonar->err == 0)
             sonarBuffer->push(rawSonarDistance);
 
         // Adjust sensor distances for calibration offsets
