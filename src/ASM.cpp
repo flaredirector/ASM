@@ -2,7 +2,7 @@
  * Flare Director
  * ASM
  * ASM.cpp
- * 
+ *
  * This implementation file contains the implementation
  * details for the ASM class.
  */
@@ -18,6 +18,8 @@
 #define MILLISECONDS *1000
 
 using namespace std;
+
+int currentColor = LED_RED;
 
 /**
  * ASM
@@ -40,7 +42,7 @@ ASM::ASM(unsigned short int port) {
     // Setup the GPIO pins for 7SD and LEDs
     ErrorCodeDisplay::setupPins();
     LEDInterface::setupPins();
-    
+
     // Display initial values
     ErrorCodeDisplay::display(SSD_NOTHING);
     LEDInterface::setColor(LED_RED);
@@ -86,7 +88,7 @@ void ASM::start() {
     }
 
     // Start listening for connections
-    this->listenForConnections(); 
+    this->listenForConnections();
 }
 
 /**
@@ -95,11 +97,12 @@ void ASM::start() {
  ** each connection.
  */
 void ASM::listenForConnections() {
-    LEDInterface::setColor(LED_GREEN);
-    // Run forever  
-    for (;;) {      
+    LEDInterface::setColor(LED_YELLOW);
+    currentColor = LED_YELLOW;
+    // Run forever
+    for (;;) {
         cout << "Waiting for Client Connection..." << endl;
-         
+
         // Create new clientSoket instance and wait for connection
         TCPSocket *clientSocket;
         try {
@@ -136,7 +139,7 @@ void ASM::listenForConnections() {
  ** Determines what to execute based on the received event
  * @param {event} The event received from the client
  * @param {data} The data passed with the event
- * @param {ctx} The current ThreadContext 
+ * @param {ctx} The current ThreadContext
  */
 void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     // Status reply message to send back to the client
@@ -145,11 +148,32 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         cout << "Starting calibration..." << endl;
-        statusReply = new Message(CALIBRATION_STATUS_EVENT, ctx->altitudeProvider->calibrate());
+	LEDInterface::setColor(LED_YELLOW);
+	currentColor = LED_YELLOW;
+	ctx->toggles->ledFlashing = true;
+	int returnCode = ctx->altitudeProvider->calibrate();
+        statusReply = new Message(CALIBRATION_STATUS_EVENT, returnCode);
+        if (returnCode < 0) {
+	    LEDInterface::setColor(LED_RED);
+	    currentColor = LED_RED;
+	    ctx->toggles->ledFlashing = true;
+	} else {
+	    ctx->toggles->ledFlashing= false;
+	    LEDInterface::setColor(LED_GREEN);
+	    currentColor = LED_GREEN;
+	}
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
-        ctx->toggles->reportingToggle ? LEDInterface::setColor(LED_BLUE) : LEDInterface::setColor(LED_GREEN);
+	if (ctx->toggles->reportingToggle) {
+	    LEDInterface::setColor(LED_BLUE);
+	    currentColor = LED_BLUE;
+	    ctx->toggles->ledFlashing = true;
+	} else {
+	    ctx->toggles->ledFlashing = false;
+	    LEDInterface::setColor(LED_GREEN);
+	    currentColor = LED_GREEN;
+	}
         statusReply = new Message(REPORTING_STATUS_EVENT, ctx->toggles->reportingToggle ? 1 : 0);
     } else if (event == GET_STATUS_EVENT) {
         cout << "Sending system status..." << endl;
@@ -190,7 +214,7 @@ void ASM::handleClientMessage(ThreadContext *ctx) {
         int recvMsgSize;
         while ((recvMsgSize = ctx->clientSocket->recv(buffer, BUFSIZE)) > 0) { // Zero means end of transmission
             // Convert into string for easier use
-            string bufferString = buffer; 
+            string bufferString = buffer;
 
             cout << "RECEIVED MESSAGE: " << bufferString << endl;
 
@@ -230,27 +254,39 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     // The loop will exit when socketIsAlive is set to false by the handleClientMessage
     // thread when a client disconnects.
     int counter = 0;
-    bool hasSentLidarFailure = false, hasSentSonarFailure = false;
+    int le = 0, se = 0;
     while (ctx->socketIsAlive) {
         if (ctx->toggles->reportingToggle && ctx->toggles->hasBeenCalibrated) {
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, ctx->altitudeProvider->getAltitude());
 
-            if (ctx->altitudeProvider->lidar->err < 0 && !hasSentLidarFailure) {
-                message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
-                hasSentLidarFailure = true;
-            }
-            if (ctx->altitudeProvider->sonar->err < 0 && !hasSentSonarFailure) {
-                message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
-                hasSentSonarFailure = true;
-            }
-                
-            message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
-            message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
-            
+	    message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
+	    message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+
+	    if (le != ctx->altitudeProvider->lidar->err || se != ctx->altitudeProvider->sonar->err) {
+		message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+		message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+
+		if (ctx->altitudeProvider->lidar->err < 0 || ctx->altitudeProvider->sonar->err < 0) {
+			ctx->toggles->ledFlashing = false;
+                        LEDInterface::setColor(LED_RED);
+			currentColor = LED_RED;
+                        ctx->toggles->ledFlashing = true;
+                } else if (ctx->altitudeProvider->lidar->err == 0 && ctx->altitudeProvider->sonar->err == 0) {
+			ctx->toggles->ledFlashing = false;
+                        LEDInterface::setColor(LED_BLUE);
+			currentColor = LED_BLUE;
+                        ctx->toggles->ledFlashing = true;
+                }
+		le = ctx->altitudeProvider->lidar->err;
+		se = ctx->altitudeProvider->sonar->err;
+	    }
+
             // Every 20 seconds, send along a battery status
             if (counter == 200) {
+		cout << "Sending sensor and battery status" << endl;
                 message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+
                 counter = 0;
             }
 
@@ -278,12 +314,12 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                     cerr << e.what() << endl;
                     return;
                 }
-                
+
                 // Free up message memory
                 delete m;
                 counter = 0;
             }
-        }  
+        }
         counter++;
         // 100 milliseconds (10 Hz)
         usleep(100 MILLISECONDS);
@@ -371,13 +407,12 @@ void *ASM::ledFlashingThreadCS(void *ctx) {
     // Loop forever
     for (;;) {
         // Get current color of the status LED
-        int cc = LEDInterface::currentColor;
         usleep(500 MILLISECONDS);
         if (((ASMToggles *) ctx)->ledFlashing) {
            LEDInterface::setColor(LED_OFF);
-            usleep(500 MILLISECONDS);
-           LEDInterface::setColor(cc);
-       }   
+           usleep(500 MILLISECONDS);
+           LEDInterface::setColor(currentColor);
+       }
    }
 
    return NULL;

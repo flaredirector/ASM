@@ -71,5 +71,10 @@ void ErrorCodeDisplay::display(short int code) {
     digitalWrite(pinD, binMap[3] ? HIGH : LOW);
     #endif
     
-    cout << "Set Error Code Display to " << (code < 0) ? "OFF" : code << endl;
+    cout << "Set Error Code Display to ";
+    if (code < 0)
+       cout << "OFF";
+    else
+       cout << code;
+    cout << endl;
 }
