@@ -148,20 +148,20 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     // Decide what to do based on received event
     if (event == CALIBRATION_EVENT) {
         cout << "Starting calibration..." << endl;
-	LEDInterface::setColor(LED_YELLOW);
-	currentColor = LED_YELLOW;
-	ctx->toggles->ledFlashing = true;
-	int returnCode = ctx->altitudeProvider->calibrate();
+        LEDInterface::setColor(LED_YELLOW);
+        currentColor = LED_YELLOW;
+        ctx->toggles->ledFlashing = true;
+	    int returnCode = ctx->altitudeProvider->calibrate();
         statusReply = new Message(CALIBRATION_STATUS_EVENT, returnCode);
         if (returnCode < 0) {
-	    LEDInterface::setColor(LED_RED);
-	    currentColor = LED_RED;
-	    ctx->toggles->ledFlashing = true;
-	} else {
-	    ctx->toggles->ledFlashing= false;
-	    LEDInterface::setColor(LED_GREEN);
-	    currentColor = LED_GREEN;
-	}
+            LEDInterface::setColor(LED_RED);
+            currentColor = LED_RED;
+            ctx->toggles->ledFlashing = true;
+        } else {
+            ctx->toggles->ledFlashing= false;
+            LEDInterface::setColor(LED_GREEN);
+            currentColor = LED_GREEN;
+        }
     } else if (event == REPORTING_TOGGLE_EVENT) {
         cout << "Toggling reporting..." << endl;
         ctx->toggles->reportingToggle = data ? true : false;
@@ -260,33 +260,30 @@ void ASM::reportAltitude(ThreadContext *ctx) {
             // Encode altitude into message for transmission
             Message *message = new Message(ALTITUDE_EVENT, ctx->altitudeProvider->getAltitude());
 
-	    message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
-	    message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
+            message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
 
-	    if (le != ctx->altitudeProvider->lidar->err || se != ctx->altitudeProvider->sonar->err) {
-		message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
-		message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+            if (le != ctx->altitudeProvider->lidar->err || se != ctx->altitudeProvider->sonar->err) {
+                message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+                message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
 
-		if (ctx->altitudeProvider->lidar->err < 0 || ctx->altitudeProvider->sonar->err < 0) {
-			ctx->toggles->ledFlashing = false;
-                        LEDInterface::setColor(LED_RED);
-			currentColor = LED_RED;
-                        ctx->toggles->ledFlashing = true;
+                if (ctx->altitudeProvider->lidar->err < 0 || ctx->altitudeProvider->sonar->err < 0) {
+                    ctx->toggles->ledFlashing = false;
+                    LEDInterface::setColor(LED_RED);
+                    currentColor = LED_RED;
+                    ctx->toggles->ledFlashing = true;
                 } else if (ctx->altitudeProvider->lidar->err == 0 && ctx->altitudeProvider->sonar->err == 0) {
-			ctx->toggles->ledFlashing = false;
-                        LEDInterface::setColor(LED_BLUE);
-			currentColor = LED_BLUE;
-                        ctx->toggles->ledFlashing = true;
+                    LEDInterface::setColor(LED_BLUE);
+                    currentColor = LED_BLUE;
+                    ctx->toggles->ledFlashing = true;
                 }
-		le = ctx->altitudeProvider->lidar->err;
-		se = ctx->altitudeProvider->sonar->err;
-	    }
+                le = ctx->altitudeProvider->lidar->err;
+                se = ctx->altitudeProvider->sonar->err;
+            }
 
             // Every 20 seconds, send along a battery status
             if (counter == 200) {
-		cout << "Sending sensor and battery status" << endl;
                 message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
-
                 counter = 0;
             }
 
