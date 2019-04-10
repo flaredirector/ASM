@@ -65,5 +65,4 @@ void LEDInterface::setColor(int color) {
     digitalWrite(pinRED, binMap[2] ? HIGH : LOW); 
     #endif
     LEDInterface::currentColor = color;
-    cout << "Set LED to " << color << endl;
 }

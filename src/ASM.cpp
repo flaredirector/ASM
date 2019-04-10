@@ -61,9 +61,12 @@ ASM::ASM(unsigned short int port) {
  ** acquisition thread, and begins listening for new connections.
  */
 void ASM::start() {
+    // Start the LED thread for flashing the LED
    pthread_t ledThreadId;
-   if (pthread_create(&ledThreadId, NULL, &ASM::ledFlashingThreadHelper, (void *) this->toggles) != 0)
-     cout << "cant create led thread" << endl;
+   if (pthread_create(&ledThreadId, NULL, 
+       &ASM::ledFlashingThreadHelper, (void *) this->toggles) != 0) {
+       cout << "cant create led thread" << endl;
+   }
 
     try {
         // Create new socket descriptor for server
@@ -262,7 +265,6 @@ void ASM::reportAltitude(ThreadContext *ctx) {
 
             // Free up message memory to prevent memory leak
             delete message;
-
         // If reporting isn't on, send battery status every 20 seconds.
         } else {
             if (counter == 200) {
@@ -281,10 +283,8 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 delete m;
                 counter = 0;
             }
-        }
-            
+        }  
         counter++;
-
         // 100 milliseconds (10 Hz)
         usleep(100 MILLISECONDS);
     }
