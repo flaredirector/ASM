@@ -50,8 +50,10 @@ ASM::ASM(unsigned short int port) {
     // Instantiate and setup new battery interface
     this->battery = new BatteryInterface();
     int batteryError = this->battery->setup();
-    if (batteryError != 0)
+    if (batteryError != 0) {
+        ErrorCodeDisplay::display(5);
         cout << "Battery Interface Error: " << batteryError << endl;
+    }
 
     // Create new altitude provider instance
     this->altitudeProvider = new AltitudeProvider(this->toggles);
@@ -67,7 +69,7 @@ void ASM::start() {
    pthread_t ledThreadId;
    if (pthread_create(&ledThreadId, NULL, 
        &ASM::ledFlashingThreadHelper, (void *) this->toggles) != 0) {
-       cout << "cant create led thread" << endl;
+       cout << "Cant create led thread" << endl;
    }
 
     try {
@@ -75,6 +77,7 @@ void ASM::start() {
         this->serverSocket = new TCPServerSocket(this->port);  
     } catch (SocketException &e) {
         // Print exception description
+        ErrorCodeDisplay::display(2);
         cerr << e.what() << endl;
         exit(1);
     }
@@ -83,6 +86,7 @@ void ASM::start() {
     pthread_t altitudeProviderThreadID;
     if (pthread_create(&altitudeProviderThreadID, NULL, 
         &ASM::acquireAltitudeDataThreadHelper, (void *) this->altitudeProvider) != 0) {
+        ErrorCodeDisplay::display(9);
         cerr << "Unable to create acquireAltitudeDataThreadHelper thread" << endl;
         exit(1);
     }
@@ -122,6 +126,7 @@ void ASM::listenForConnections() {
         // Spawn thread for sending client altitude data
         pthread_t firstThreadID;
         if (pthread_create(&firstThreadID, NULL, &ASM::reportAltitudeThreadHelper, (void *) ctx) != 0) {
+            ErrorCodeDisplay::display(9);
             cerr << "Unable to create reportAltitudeThreadHelper thread" << endl;
             exit(1);
         }
@@ -129,6 +134,7 @@ void ASM::listenForConnections() {
         // Spawn thread for handling when a client sends a message
         pthread_t secondThreadID;
         if (pthread_create(&secondThreadID, NULL, &ASM::handleClientMessageThreadHelper, (void *) ctx) != 0) {
+            ErrorCodeDisplay::display(9);
             cerr << "Unable to create handleClientMessageThreadHelper thread" << endl;
             exit(1);
         }
@@ -155,6 +161,7 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
 	    int returnCode = ctx->altitudeProvider->calibrate();
         statusReply = new Message(CALIBRATION_STATUS_EVENT, returnCode);
         if (returnCode < 0) {
+            ErrorCodeDisplay::display(3);
             LEDInterface::setColor(LED_RED);
             currentColor = LED_RED;
             ctx->toggles->ledFlashing = true;
@@ -277,6 +284,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
 
                 if (ctx->altitudeProvider->lidar->err < 0 || ctx->altitudeProvider->sonar->err < 0) {
+                    ErrorCodeDisplay::display(1);
                     ctx->toggles->ledFlashing = false;
                     LEDInterface::setColor(LED_RED);
                     currentColor = LED_RED;
@@ -292,7 +300,10 @@ void ASM::reportAltitude(ThreadContext *ctx) {
 
             // Every 20 seconds, send along a battery status
             if (counter == 200) {
-                message->addEvent(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+                int bp = ctx->battery->getPercentage();
+                if (bp < 20)
+                    ErrorCodeDisplay::display(4);
+                message->addEvent(BATTERY_STATUS_EVENT, bp);
                 counter = 0;
             }
 
@@ -311,7 +322,10 @@ void ASM::reportAltitude(ThreadContext *ctx) {
         } else {
             if (counter == 200) {
                 // Encode battery level into message
-                Message *m = new Message(BATTERY_STATUS_EVENT, ctx->battery->getPercentage());
+                int bp = ctx->battery->getPercentage();
+                if (bp < 20)
+                    ErrorCodeDisplay::display(4);
+                Message *m = new Message(BATTERY_STATUS_EVENT, );
 
                 // Try sending message over connection
                 try {
