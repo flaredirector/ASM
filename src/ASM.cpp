@@ -97,8 +97,9 @@ void ASM::start() {
  ** each connection.
  */
 void ASM::listenForConnections() {
-    LEDInterface::setColor(LED_YELLOW);
-    currentColor = LED_YELLOW;
+    this->toggles->ledFlashing = true;
+    LEDInterface::setColor(LED_GREEN);
+    currentColor = LED_GREEN;
     // Run forever
     for (;;) {
         cout << "Waiting for Client Connection..." << endl;
