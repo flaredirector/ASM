@@ -187,6 +187,7 @@ void ASM::handleEvent(string event, int data, ThreadContext *ctx) {
     } else if (event == DATA_LOGGING_TOGGLE_EVENT) {
         cout << "Toggling data logging..." << endl;
         ctx->toggles->dataLoggingToggle = data ? true : false;
+        ctx->altitudeProvider->dataFile << "LIDAR, SONAR, ALTITUDE" << endl;
         statusReply = new Message(DATA_LOGGING_STATUS_EVENT, ctx->toggles->dataLoggingToggle ? 1 : 0);
     } else {
         cout << "Parsed unrecognized event" << endl;

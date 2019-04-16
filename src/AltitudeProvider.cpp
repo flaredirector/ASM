@@ -15,8 +15,8 @@
 #include <unistd.h>  // for usleep
 #include <ctime>
 
-#define LIDAR_FACTOR 0.8
-#define SONAR_FACTOR 0.2
+#define LIDAR_FACTOR 0.9
+#define SONAR_FACTOR 0.1
 #define MAX_OFFSET_FEET 6
 #define LIDAR_OUT_OF_RANGE_VALUE 0
 #define SONAR_OUT_OF_RANGE_VALUE 1068
@@ -39,12 +39,14 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->sonar = new SONARInterface();
 
     // Open file up for data logging
+    #ifndef DEBUG
     time_t now = time(0);
     tm *ltm = localtime(&now);
     char dataFilename[50];
     sprintf(dataFilename, "data_%d_%d_%d_%d_%d.csv", ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
     this->dataFile.open(dataFilename);
-    this->dataFile << "LIDAR,SONAR" << endl;
+    this->dataFile << "LIDAR,SONAR, ALTITUDE" << endl;
+    #endif
 
     // Set inital values
     this->lidarDistance = 0;
@@ -74,12 +76,14 @@ void AltitudeProvider::acquireDataLoop() {
     // Initialize data buffers for sensor data
     FixedQueue *lidarBuffer = new FixedQueue(5);
     FixedQueue *sonarBuffer = new FixedQueue(5);
-    
+
     // Acquire data while both sensors are operational
     for (;;) {
         // Log the raw sensor data
+        #ifndef DEBUG
         if (this->toggles->dataLoggingToggle)
-            this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
+            this->dataFile << this->lidarDistance << "," << this->sonarDistance;
+        #endif
 
         // Get sensor data
         // int rawLidarDistance = 0, rawSonarDistance = 1068; 
@@ -108,11 +112,24 @@ void AltitudeProvider::acquireDataLoop() {
            (this->sonarDistance == 0 || rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE)) {
             this->altitude = this->lidarDistance;
         } else if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0 && 
-                    abs(this->lidarDistance - this->sonarDistance) <= 50) {
+                    abs(this->lidarDistance - this->sonarDistance) <= 50) {        
             this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
         } else if (rawLidarDistance == LIDAR_OUT_OF_RANGE_VALUE && rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
             this->altitude = -1;
+        // Fallback to LIDAR if sensor discrepancy happens
+        } else {
+            this->altitude = this->lidarDistance;
         }
+
+        // Log when a sensor discrepancy happens
+        if (abs(this->lidarDistance - this->sonarDistance) >= 50 && rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE) {
+            cout << "Sensor Threshold Discrepancy: " << abs(this->lidarDistance - this->sonarDistance) << endl; 
+        }
+
+        #ifndef DEBUG
+        if (this->toggles->dataLoggingToggle)
+            this->dataFile << "," << this->altitude << endl;
+        #endif
 
         // If reporting is on, run at 10hz, if not, 1hz
         if (this->toggles->reportingToggle)
