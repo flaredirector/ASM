@@ -13,6 +13,7 @@
 #include "FixedQueue.hpp"
 #include <iostream>
 #include <unistd.h>  // for usleep
+#include <ctime>
 
 #define LIDAR_FACTOR 0.8
 #define SONAR_FACTOR 0.2
@@ -39,7 +40,11 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     this->sonar = new SONARInterface();
 
     // Open file up for data logging
-    this->dataFile.open(DATA_LOGGING_FILENAME);
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    char dataFilename[50];
+    sprintf(dataFilename, "data_%d_%d_%d_%d.csv", ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min);
+    this->dataFile.open(dataFilename);
     this->dataFile << "LIDAR,SONAR" << endl;
 
     // Set inital values
@@ -100,7 +105,7 @@ void AltitudeProvider::acquireDataLoop() {
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
         // of range of sonar, which needs to be handled.
-        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE) 
+        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0) 
         {
             this->altitude = this->lidarDistance;
         } else {
