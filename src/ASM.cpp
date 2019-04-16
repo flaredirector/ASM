@@ -258,11 +258,18 @@ void ASM::reportAltitude(ThreadContext *ctx) {
     while (ctx->socketIsAlive) {
         if (ctx->toggles->reportingToggle && ctx->toggles->hasBeenCalibrated) {
             // Encode altitude into message for transmission
-            Message *message = new Message(ALTITUDE_EVENT, ctx->altitudeProvider->getAltitude());
+            Message *message;
+            int altitude = ctx->altitudeProvider->getAltitude();
+            if (altitude == -1) {
+                message = new Message(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
+                message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            } else {
+                message = new Message(ALTITUDE_EVENT, ctx->altitudeProvider->getAltitude());
+                message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
+                message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
+            }
 
-            message->addEvent(LIDAR_DATA_EVENT, ctx->altitudeProvider->lidarDistance);
-            message->addEvent(SONAR_DATA_EVENT, ctx->altitudeProvider->sonarDistance);
-
+            // Check sensor error codes and report if the error code has changed
             if (le != ctx->altitudeProvider->lidar->err || se != ctx->altitudeProvider->sonar->err) {
                 message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
                 message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);

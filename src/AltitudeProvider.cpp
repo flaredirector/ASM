@@ -42,7 +42,7 @@ AltitudeProvider::AltitudeProvider(ASMToggles *asmToggles) {
     time_t now = time(0);
     tm *ltm = localtime(&now);
     char dataFilename[50];
-    sprintf(dataFilename, "data_%d_%d_%d_%d.csv", ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min);
+    sprintf(dataFilename, "data_%d_%d_%d_%d_%d.csv", ltm->tm_mon, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
     this->dataFile.open(dataFilename);
     this->dataFile << "LIDAR,SONAR" << endl;
 
@@ -104,11 +104,14 @@ void AltitudeProvider::acquireDataLoop() {
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
         // of range of sonar, which needs to be handled.
-        if (this->lidarDistance != LIDAR_OUT_OF_RANGE_VALUE && this->sonarDistance == SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0) 
-        {
+        if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE && 
+           (this->sonarDistance == 0 || rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE)) {
             this->altitude = this->lidarDistance;
-        } else {
+        } else if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0 && 
+                    abs(this->lidarDistance - this->sonarDistance) <= 50) {
             this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
+        } else if (rawLidarDistance == LIDAR_OUT_OF_RANGE_VALUE && rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
+            this->altitude = -1;
         }
 
         // If reporting is on, run at 10hz, if not, 1hz
