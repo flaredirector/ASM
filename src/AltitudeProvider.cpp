@@ -17,7 +17,6 @@
 
 #define LIDAR_FACTOR 0.8
 #define SONAR_FACTOR 0.2
-#define DATA_LOGGING_FILENAME "data.csv"
 #define MAX_OFFSET_FEET 6
 #define LIDAR_OUT_OF_RANGE_VALUE 0
 #define SONAR_OUT_OF_RANGE_VALUE 1068
@@ -83,9 +82,9 @@ void AltitudeProvider::acquireDataLoop() {
             this->dataFile << this->lidarDistance << "," << this->sonarDistance << endl;
 
         // Get sensor data
-        int rawLidarDistance = 0, rawSonarDistance = 1068; 
-        rawLidarDistance = this->lidar->getDistance();
-        rawSonarDistance = this->sonar->getDistance();
+        // int rawLidarDistance = 0, rawSonarDistance = 1068; 
+        int rawLidarDistance = this->lidar->getDistance();
+        int rawSonarDistance = this->sonar->getDistance();
 
         // Push data into FIFO buffer
         if (rawLidarDistance != -1 && this->lidar->err == 0)
