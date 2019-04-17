@@ -325,18 +325,38 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 int bp = ctx->battery->getPercentage();
                 if (bp < 20)
                     ErrorCodeDisplay::display(4);
-                Message *m = new Message(BATTERY_STATUS_EVENT, bp);
+                Message *message = new Message(BATTERY_STATUS_EVENT, bp);
+
+                // Check sensor error codes and report if the error code has changed
+                if (le != ctx->altitudeProvider->lidar->err || se != ctx->altitudeProvider->sonar->err) {
+                    message->addEvent(LIDAR_STATUS_EVENT, ctx->altitudeProvider->lidar->err);
+                    message->addEvent(SONAR_STATUS_EVENT, ctx->altitudeProvider->sonar->err);
+
+                    if (ctx->altitudeProvider->lidar->err < 0 || ctx->altitudeProvider->sonar->err < 0) {
+                        ErrorCodeDisplay::display(1);
+                        ctx->toggles->ledFlashing = false;
+                        LEDInterface::setColor(LED_RED);
+                        currentColor = LED_RED;
+                        ctx->toggles->ledFlashing = true;
+                    } else if (ctx->altitudeProvider->lidar->err == 0 && ctx->altitudeProvider->sonar->err == 0) {
+                        LEDInterface::setColor(LED_BLUE);
+                        currentColor = LED_BLUE;
+                        ctx->toggles->ledFlashing = true;
+                    }
+                    le = ctx->altitudeProvider->lidar->err;
+                    se = ctx->altitudeProvider->sonar->err;
+                }
 
                 // Try sending message over connection
                 try {
-                    ctx->clientSocket->send(m);
+                    ctx->clientSocket->send(message);
                 } catch (SocketException &e) {
                     cerr << e.what() << endl;
                     return;
                 }
 
                 // Free up message memory
-                delete m;
+                delete message;
                 counter = 0;
             }
         }
