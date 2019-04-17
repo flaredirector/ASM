@@ -325,7 +325,7 @@ void ASM::reportAltitude(ThreadContext *ctx) {
                 int bp = ctx->battery->getPercentage();
                 if (bp < 20)
                     ErrorCodeDisplay::display(4);
-                Message *m = new Message(BATTERY_STATUS_EVENT, );
+                Message *m = new Message(BATTERY_STATUS_EVENT, bp);
 
                 // Try sending message over connection
                 try {
