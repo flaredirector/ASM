@@ -108,18 +108,27 @@ void AltitudeProvider::acquireDataLoop() {
         // Check if lidar is detecting ground and if sonar is at max range.
         // If this is the case, aircraft is at upper boundary of lidar and out
         // of range of sonar, which needs to be handled.
-        if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE && 
-           (this->sonarDistance == 0 || rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE)) {
+        if (rawLidarDistance != -1 && rawSonarDistance != -1) {
+            if (rawLidarDistance != LIDAR_OUT_OF_RANGE_VALUE && 
+            (this->sonarDistance == 0 || rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE)) {
+                this->altitude = this->lidarDistance;
+            } else if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0 && 
+                        abs(this->lidarDistance - this->sonarDistance) <= 50) {        
+                this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
+            } else if (rawLidarDistance == LIDAR_OUT_OF_RANGE_VALUE && rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
+                this->altitude = -1;
+            // Fallback to LIDAR if sensor discrepancy happens
+            } else {
+                this->altitude = this->lidarDistance;
+            }
+        } else if (rawLidarDistance != -1 && rawSonarDistance == -1) {
             this->altitude = this->lidarDistance;
-        } else if (rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE && this->sonarDistance != 0 && 
-                    abs(this->lidarDistance - this->sonarDistance) <= 50) {        
-            this->altitude = (int) (LIDAR_FACTOR * this->lidarDistance) + (SONAR_FACTOR * this->sonarDistance);
-        } else if (rawLidarDistance == LIDAR_OUT_OF_RANGE_VALUE && rawSonarDistance == SONAR_OUT_OF_RANGE_VALUE) {
-            this->altitude = -1;
-        // Fallback to LIDAR if sensor discrepancy happens
+        } else if (rawLidarDistance == -1 && rawSonarDistance != -1) {
+            this->altitude = this->sonarDistance;
         } else {
-            this->altitude = this->lidarDistance;
+            this->altitude = -1;
         }
+        
 
         // Log when a sensor discrepancy happens
         if (abs(this->lidarDistance - this->sonarDistance) >= 50 && rawSonarDistance != SONAR_OUT_OF_RANGE_VALUE) {
